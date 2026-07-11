@@ -19,10 +19,11 @@ test("three players join one room with a live, synced roster", async ({ browser 
   const g1 = await g1Ctx.newPage();
   const g2 = await g2Ctx.newPage();
 
-  // --- Host creates a room ---
+  // --- Host creates a room (home -> Create -> name step -> lobby) ---
   await host.goto("/index.html");
-  await host.fill("#name-input", "Anne");
   await host.click("#create-btn");
+  await host.fill("#name-input", "Anne");
+  await host.click("#confirm-btn");
   await expect(host.locator("#screen-lobby")).toHaveAttribute("data-active", "true");
 
   const code = (await host.locator("#code-display").textContent()).trim();
@@ -31,15 +32,15 @@ test("three players join one room with a live, synced roster", async ({ browser 
   await expect(host.locator("#start-btn")).toBeVisible();      // host control
   await expect(host.locator(".player-item")).toHaveCount(1);   // just the host so far
 
-  // --- Two guessers join via the invite link ---
+  // --- Two guessers join via the invite link (lands on the name step) ---
   await g1.goto(`/index.html?room=${code}`);
   await g1.fill("#name-input", "Bo");
-  await g1.click("#join-btn");
+  await g1.click("#confirm-btn");
   await expect(g1.locator("#screen-lobby")).toHaveAttribute("data-active", "true");
 
   await g2.goto(`/index.html?room=${code}`);
   await g2.fill("#name-input", "Cai");
-  await g2.click("#join-btn");
+  await g2.click("#confirm-btn");
   await expect(g2.locator("#screen-lobby")).toHaveAttribute("data-active", "true");
 
   // --- All three see the full roster, live ---
