@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess Who</title>
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Landing screen (placeholder — real create/join comes in issue #3) -->
+    <section class="screen" id="screen-landing" data-active="true">
+      <div class="hero">
+        <h1 class="title">Guess Who</h1>
+        <p class="tagline">A party game for you and your friends.</p>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="button" disabled>Create room</button>
+          <button class="btn btn-ghost" type="button" disabled>Join room</button>
+        </div>
+
+        <p class="build-note" id="build-note">Loading…</p>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
