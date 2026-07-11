@@ -1,0 +1,59 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "rooms": {
+      "$roomCode": {
+
+        "meta": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "code":   { ".validate": "newData.isString() && newData.val().length <= 8" },
+          "hostId": { ".validate": "newData.isString() && newData.val().length <= 128" },
+          "mode":   { ".validate": "newData.isString() && newData.val().length <= 20" },
+          "phase":  { ".validate": "newData.isString() && newData.val().length <= 20" }
+        },
+
+        "players": {
+          ".read": "auth != null",
+          "$playerId": {
+            ".write": "auth != null && auth.uid === $playerId",
+            "name":  { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "role":  { ".validate": "newData.isString() && newData.val().length <= 16" },
+            "score": { ".validate": "newData.isNumber()" }
+          }
+        },
+
+        "deck": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "$characterId": {
+            "name":     { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "imageUrl": { ".validate": "newData.isString() && newData.val().length <= 4000" },
+            "addedBy":  { ".validate": "newData.isString() && newData.val().length <= 128" }
+          }
+        },
+
+        "boards": {
+          ".read": "auth != null",
+          "$playerId": {
+            ".write": "auth != null && auth.uid === $playerId"
+          }
+        },
+
+        "round": {
+          "revealFlags": {
+            ".read": "auth != null",
+            ".write": "auth != null"
+          },
+          "targetCharacterId": {
+            ".read":  "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
+            ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
+            ".validate": "newData.isString() && newData.val().length <= 128"
+          }
+        }
+      }
+    }
+  }
+}
