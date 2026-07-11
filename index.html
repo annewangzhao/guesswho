@@ -8,20 +8,52 @@
 </head>
 <body>
   <div id="app">
-    <!-- Landing screen (placeholder — real create/join comes in issue #3) -->
+
+    <!-- Landing: enter name, then create or join a room -->
     <section class="screen" id="screen-landing" data-active="true">
-      <div class="hero">
+      <div class="card">
         <h1 class="title">Guess Who</h1>
         <p class="tagline">A party game for you and your friends.</p>
 
+        <label class="field">
+          <span class="field-label">Your name</span>
+          <input id="name-input" class="input" type="text" maxlength="40"
+                 placeholder="e.g. Anne" autocomplete="off" />
+        </label>
+
         <div class="actions">
-          <button class="btn btn-primary" type="button" disabled>Create room</button>
-          <button class="btn btn-ghost" type="button" disabled>Join room</button>
+          <button class="btn btn-primary" id="create-btn" type="button">Create room</button>
         </div>
 
-        <p class="build-note" id="build-note">Loading…</p>
+        <div class="divider"><span>or join one</span></div>
+
+        <div class="join-row">
+          <input id="code-input" class="input input-code" type="text" maxlength="4"
+                 placeholder="CODE" autocomplete="off" spellcheck="false" />
+          <button class="btn btn-ghost" id="join-btn" type="button">Join</button>
+        </div>
+
+        <p class="error" id="landing-error" hidden></p>
       </div>
     </section>
+
+    <!-- Lobby: shareable code + live player list; host can start -->
+    <section class="screen" id="screen-lobby">
+      <div class="card">
+        <p class="lobby-eyebrow">Room code</p>
+        <div class="code-display" id="code-display">····</div>
+        <button class="btn btn-tiny" id="copy-link-btn" type="button">Copy invite link</button>
+
+        <h2 class="lobby-heading">Players</h2>
+        <ul class="player-list" id="player-list"></ul>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="start-btn" type="button" hidden>Start game</button>
+          <p class="waiting" id="waiting-note" hidden>Waiting for the host to start…</p>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <script type="module" src="./src/main.js"></script>
