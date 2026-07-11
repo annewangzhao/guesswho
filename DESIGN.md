@@ -178,19 +178,79 @@ flat top-down "blueprint." Stretch/polish feature.
 ## 12. Tech & Hosting (decided)
 - **Frontend:** static HTML/CSS/JS, hosted free on **GitHub Pages**
   (`annewangzhao.github.io/guesswho`).
-- **Realtime backend:** **Firebase** (Realtime Database or Firestore) for shared
-  game state; **Firebase Storage** for photos. No custom server.
+- **Realtime backend:** **Firebase Realtime Database** for shared game state;
+  **Firebase Storage** for photos. No custom server.
 - Friends join via link + room code; nothing to install.
-- ⚠️ **OPEN:** Realtime Database vs Firestore — decide when we design the data model.
+- **Decided: Realtime Database over Firestore.** The whole game is "one room = one
+  JSON tree everyone subscribes to," with lots of tiny high-frequency writes (tile
+  flips, deck additions, reveal flags) — exactly RTDB's sweet spot. Firestore's
+  advantages (rich queries, massive scale) don't apply here.
+- Project: `guess-who-bays`. SDK loaded from the gstatic CDN (pinned in
+  [src/firebase.js](src/firebase.js)); no build step.
 
-## 13. Data Model (sketch — to flesh out)
-Rough shape, per room:
-- `room`: code, hostId, mode, phase, createdAt
-- `players[]`: id, name, role (host/guesser), score/pot
-- `deck[]`: characterId, name, imageUrl
-- `boards`: per-playerId → ordered list of characterIds (their randomized layout)
-  + per-character eliminated flag + final guess
-- `round`: targetCharacterId (host-only visibility), reveal flags per guesser
+## 13. Data Model (Realtime Database)
+
+Everything lives under `rooms/{roomCode}`. Room codes are short and human-typed
+(e.g. `WXYZ`). Shape:
+
+```
+rooms/
+  {roomCode}/
+    meta/
+      code:       "WXYZ"
+      hostId:     "<playerId>"
+      mode:       "basic"            // future: "backGuess", "betting"
+      phase:      "lobby"            // lobby | deckBuilding | hostPick | guessing | reveal | done
+      createdAt:  <serverTimestamp>
+    players/
+      {playerId}/
+        name:      "Anne"
+        role:      "host" | "guesser"
+        joinedAt:  <serverTimestamp>
+        connected: true              // maintained via onDisconnect()
+        score:     0
+    deck/                            // the shared, collaboratively-built character set
+      {characterId}/
+        name:      "Bob"
+        imageUrl:  "https://.../bob.jpg"   // Firebase Storage URL
+        addedBy:   "<playerId>"
+        addedAt:   <serverTimestamp>
+    boards/                          // one per player; positions randomized per player (§4)
+      {playerId}/
+        layout:      ["<charId>", "<charId>", ...]   // this player's shuffled order
+        eliminated/  { "<charId>": true, ... }        // flipped-down tiles
+        finalGuess:  "<charId>" | null
+        revealed:    false
+    round/
+      targetCharacterId: "<charId>"  // host's pick — hidden from guessers by rules
+      revealFlags/  { "<playerId>": true, ... }        // reveal happens when all guessers set
+```
+
+**Design notes**
+- **Per-player `layout`** is what makes the anti-inference randomization (§4) work:
+  each board renders in its own shuffled order, so a flipped position means nothing
+  across players.
+- **`targetCharacterId`** must be readable by the host but **not** guessers —
+  enforced in security rules (§13.1), not just the UI.
+- **`connected`** + `onDisconnect()` lets the lobby show who's actually present.
+- Maps keyed by id (`eliminated`, `revealFlags`) instead of arrays — RTDB best
+  practice; avoids index-shifting races on concurrent writes.
+
+### 13.1 Security Rules (`database.rules.json`)
+See the committed rules file. Baseline for a low-stakes friends game:
+- **Anonymous auth required** (`auth != null`) for all reads/writes — a speed bump
+  against random unauthenticated traffic and the foundation for per-player rules.
+- Scoped to `rooms/…` so nothing can touch the DB root.
+- **Structural validation** (types, string length caps, image-url size) to limit
+  abuse/garbage.
+- `round/targetCharacterId` is **write-anyone-in-room but read-restricted to the
+  host** so guessers literally cannot fetch the answer.
+
+⚠️ **Honest limitation:** the repo is public, so the Firebase config (incl.
+`apiKey`) is world-readable, and anyone could call `signInAnonymously` with it.
+These rules stop casual/accidental access and cap damage, but this is **not**
+suitable for sensitive data — fine for a low-stakes party game. Not a concern for
+v1.
 
 ## 14. Open Questions (rollup)
 
@@ -202,7 +262,7 @@ responsive, §7).
 1. Score persistence in v1 vs later? (§5) — *leaning: round-win display in v1.*
 2. Betting money source/rules? (§6.3) — *future.*
 3. Question-card mechanics: draw rules, tracking? (§8) — *future.*
-4. Firebase Realtime DB vs Firestore? (§12) — *decide at data-model step.*
+4. ~~Firebase Realtime DB vs Firestore?~~ **Resolved: Realtime Database** (§12).
 5. Deck frozen at host-pick, or editable mid-round? (§7) — *leaning: freeze.*
 6. Soft cap on character count for layout/perf? (§7) — *decide during build.*
 
