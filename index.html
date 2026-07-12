@@ -95,6 +95,38 @@
       </div>
     </section>
 
+    <!-- Host picks the target (host sees gallery; guessers wait) -->
+    <section class="screen" id="screen-hostpick">
+      <!-- Host view -->
+      <div class="pick-layout" id="pick-host" hidden>
+        <header class="deck-header">
+          <div>
+            <p class="lobby-eyebrow">Room <span id="pick-code"></span></p>
+            <h2 class="deck-title">Pick your target</h2>
+            <p class="deck-sub">Secretly choose who everyone will try to guess. Only you can see this.</p>
+          </div>
+        </header>
+        <div class="board-grid pick-grid" id="pick-grid"></div>
+
+        <div class="pick-bar" id="pick-bar" hidden>
+          <div class="pick-target">
+            <img class="pick-target-photo" id="pick-target-photo" alt="" />
+            <div>
+              <span class="pick-target-label">Your target</span>
+              <span class="pick-target-name" id="pick-target-name"></span>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="pick-start-btn" type="button">Start round</button>
+        </div>
+      </div>
+
+      <!-- Guesser view -->
+      <div class="card" id="pick-waiting" hidden>
+        <div class="pick-waiting-emoji">🕵️</div>
+        <p class="waiting"><span id="pick-host-name">The host</span> is picking the target…</p>
+      </div>
+    </section>
+
   </div>
 
   <script type="module" src="./src/main.js"></script>

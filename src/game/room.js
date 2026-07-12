@@ -113,3 +113,8 @@ export function watchMeta(code, onMeta) {
 export async function setPhase(code, phase) {
   await update(ref(db, `rooms/${code}/meta`), { phase });
 }
+
+// Host-only (enforced by rules): set the target character for the round.
+export async function setTarget(code, characterId) {
+  await set(ref(db, `rooms/${code}/round/targetCharacterId`), characterId);
+}

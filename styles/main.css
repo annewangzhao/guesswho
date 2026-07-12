@@ -298,3 +298,50 @@ body {
   text-overflow: ellipsis;
 }
 .board-empty { color: var(--text-muted); text-align: center; margin-top: 30px; }
+
+/* ---- Host pick ---- */
+.pick-layout { width: 100%; max-width: 880px; text-align: left; padding-bottom: 96px; }
+.pick-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); margin-top: 20px; }
+.pick-tile {
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+.pick-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.pick-tile.is-selected { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.pick-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.1);
+}
+.pick-target { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pick-target-photo {
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex: none;
+}
+.pick-target-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+.pick-target-name { display: block; font-weight: 700; }
+
+.pick-waiting-emoji { font-size: 2.4rem; margin-bottom: 8px; }
