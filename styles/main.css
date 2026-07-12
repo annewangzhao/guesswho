@@ -378,3 +378,54 @@ body {
 
 .guess-status { color: var(--text-muted); font-size: 0.9rem; min-width: 0; }
 .guess-actions { display: flex; gap: 10px; align-items: center; }
+
+/* ---- Host watch (boards from behind) ---- */
+.watch-boards {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  margin-top: 20px;
+}
+.watch-board {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.watch-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.watch-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2ea043;
+  border: 1px solid #2ea043;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.back-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+}
+.back-tile {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  /* a "card back" — no identity shown */
+  background:
+    repeating-linear-gradient(45deg, var(--accent) 0 6px, transparent 6px 12px),
+    var(--surface);
+  border: 1px solid var(--border);
+  opacity: 0.9;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.back-tile.is-down {
+  background: var(--bg);
+  opacity: 0.3;
+}
+.watch-status { color: var(--text-muted); font-size: 0.85rem; margin: 12px 0 0; }

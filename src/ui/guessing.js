@@ -3,7 +3,7 @@
 // host's watch view (#9) and the reveal (#10) can read it.
 
 import { watchDeck } from "../game/deck.js";
-import { watchMeta } from "../game/room.js";
+import { watchMeta, watchPlayers } from "../game/room.js";
 import {
   ensureBoardLayout,
   watchBoard,
@@ -31,6 +31,14 @@ export function mountGuessing(code, myUid) {
   let mode = "eliminate"; // "eliminate" | "selecting"
   let pending = null; // candidate guess while selecting
   let boardUnsub = null;
+
+  // Host-watch state
+  const watchContainer = document.getElementById("watch-boards");
+  let watchPlayersUnsub = null;
+  const watchBoardUnsubs = {}; // guesserId -> unsub
+  const watchBoards = {}; // guesserId -> board data
+  let watchGuessers = []; // [{ id, name }]
+  let watchSetup = false;
 
   const isLocked = () => !!finalGuess;
 
@@ -119,6 +127,77 @@ export function mountGuessing(code, myUid) {
     await lockGuess(code, pending); // finalGuess arrives via watchBoard
   };
 
+  // ----- Host watch: see each guesser's board from behind (backs only) -----
+  function renderWatch() {
+    watchContainer.innerHTML = "";
+    for (const g of watchGuessers) {
+      const b = watchBoards[g.id] || {};
+      const layout = Array.isArray(b.layout) ? b.layout : [];
+      const elim = b.eliminated || {};
+      const locked = !!b.finalGuess;
+
+      const card = document.createElement("div");
+      card.className = "watch-board";
+      card.dataset.guesserId = g.id;
+
+      const nameRow = document.createElement("div");
+      nameRow.className = "watch-name";
+      nameRow.textContent = g.name;
+      if (locked) {
+        const badge = document.createElement("span");
+        badge.className = "watch-badge";
+        badge.textContent = "Locked in ✓";
+        nameRow.append(badge);
+      }
+
+      const backGrid = document.createElement("div");
+      backGrid.className = "back-grid";
+      if (!layout.length) {
+        const wait = document.createElement("p");
+        wait.className = "watch-status";
+        wait.textContent = "Getting ready…";
+        card.append(nameRow, wait);
+        watchContainer.append(card);
+        continue;
+      }
+      let down = 0;
+      for (const id of layout) {
+        const cell = document.createElement("div");
+        cell.className = "back-tile" + (elim[id] ? " is-down" : "");
+        backGrid.append(cell);
+        if (elim[id]) down++;
+      }
+
+      const status = document.createElement("p");
+      status.className = "watch-status";
+      status.textContent = locked ? "Locked in their guess" : `${down} ruled out`;
+
+      card.append(nameRow, backGrid, status);
+      watchContainer.append(card);
+    }
+  }
+
+  function setupHostWatch() {
+    if (watchSetup) return;
+    watchSetup = true;
+    document.getElementById("watch-code").textContent = code;
+    watchPlayersUnsub = watchPlayers(code, (players) => {
+      watchGuessers = players
+        .filter((p) => p.role === "guesser")
+        .map((p) => ({ id: p.id, name: p.name }));
+      // Subscribe to any guesser boards we're not watching yet.
+      for (const g of watchGuessers) {
+        if (!watchBoardUnsubs[g.id]) {
+          watchBoardUnsubs[g.id] = watchBoard(code, g.id, (b) => {
+            watchBoards[g.id] = b;
+            renderWatch();
+          });
+        }
+      }
+      renderWatch();
+    });
+  }
+
   // Once we know we're a guesser and have the deck, ensure a layout + subscribe.
   async function maybeSetupBoard() {
     if (isHost !== false || !deckIds.length || boardUnsub) return;
@@ -140,7 +219,8 @@ export function mountGuessing(code, myUid) {
       isHost = host;
       hostView.hidden = !host;
       guesserView.hidden = host;
-      maybeSetupBoard();
+      if (host) setupHostWatch();
+      else maybeSetupBoard();
     }
   });
 
@@ -154,7 +234,10 @@ export function mountGuessing(code, myUid) {
     unwatchMeta();
     unwatchDeck();
     if (boardUnsub) boardUnsub();
+    if (watchPlayersUnsub) watchPlayersUnsub();
+    for (const unsub of Object.values(watchBoardUnsubs)) unsub();
     lockBtn.onclick = confirmBtn.onclick = cancelBtn.onclick = null;
     grid.innerHTML = "";
+    watchContainer.innerHTML = "";
   };
 }
