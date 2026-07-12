@@ -135,10 +135,19 @@
           <div>
             <p class="lobby-eyebrow">Room <span id="guess-code"></span></p>
             <h2 class="deck-title">Your board</h2>
-            <p class="deck-sub">Ask questions out loud to narrow it down.</p>
+            <p class="deck-sub" id="guess-instruction">Tap to flip down the people you've ruled out.</p>
           </div>
         </header>
         <div class="board-grid" id="guess-grid"></div>
+
+        <div class="pick-bar" id="guess-bar">
+          <div class="guess-status" id="guess-status"></div>
+          <div class="guess-actions">
+            <button class="btn btn-ghost" id="guess-cancel-btn" type="button" hidden>Cancel</button>
+            <button class="btn btn-primary" id="guess-lock-btn" type="button">Lock in my guess</button>
+            <button class="btn btn-primary" id="guess-confirm-btn" type="button" hidden disabled>Confirm guess</button>
+          </div>
+        </div>
       </div>
 
       <!-- Host view (watching comes in a later step) -->
