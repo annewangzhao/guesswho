@@ -127,6 +127,27 @@
       </div>
     </section>
 
+    <!-- Guessing: each guesser sees their own randomized board -->
+    <section class="screen" id="screen-guessing">
+      <!-- Guesser view -->
+      <div class="pick-layout" id="guess-guesser" hidden>
+        <header class="deck-header">
+          <div>
+            <p class="lobby-eyebrow">Room <span id="guess-code"></span></p>
+            <h2 class="deck-title">Your board</h2>
+            <p class="deck-sub">Ask questions out loud to narrow it down.</p>
+          </div>
+        </header>
+        <div class="board-grid" id="guess-grid"></div>
+      </div>
+
+      <!-- Host view (watching comes in a later step) -->
+      <div class="card" id="guess-host" hidden>
+        <div class="pick-waiting-emoji">👀</div>
+        <p class="waiting">Guessers are working it out…</p>
+      </div>
+    </section>
+
   </div>
 
   <script type="module" src="./src/main.js"></script>
