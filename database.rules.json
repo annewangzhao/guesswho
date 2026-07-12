@@ -30,7 +30,7 @@
           ".write": "auth != null",
           "$characterId": {
             "name":     { ".validate": "newData.isString() && newData.val().length <= 40" },
-            "imageUrl": { ".validate": "newData.isString() && newData.val().length <= 4000" },
+            "imageUrl": { ".validate": "newData.isString() && newData.val().length <= 80000" },
             "addedBy":  { ".validate": "newData.isString() && newData.val().length <= 128" }
           }
         },

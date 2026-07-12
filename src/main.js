@@ -1,12 +1,17 @@
 // Entry point: home (join-with-code OR create) -> name step -> lobby.
 
 import { showScreen } from "./ui/screens.js";
-import { createRoom, joinRoom, normalizeCode } from "./game/room.js";
+import { createRoom, joinRoom, normalizeCode, watchMeta } from "./game/room.js";
 import { mountLobby } from "./ui/lobby.js";
+import { mountDeckBuilding } from "./ui/deck.js";
 
-let lobbyCleanup = null;
 let intent = null; // "create" | "join"
 let pendingCode = ""; // room code when joining
+
+// Room routing: once in a room, watch the phase and mount the matching screen.
+let roomUnwatch = null;
+let screenCleanup = null;
+let currentPhase = null;
 
 function setError(id, msg) {
   const el = document.getElementById(id);
@@ -46,12 +51,35 @@ function onCreateFromHome() {
   goToNameStep("create");
 }
 
-async function enterLobby(code, uid) {
-  if (lobbyCleanup) lobbyCleanup();
+// Mount the screen for a given phase. Unknown/unbuilt phases leave the current
+// screen up (so the app doesn't blank out on phases we haven't built yet).
+function routeToPhase(phase, code, uid) {
+  const mounts = {
+    lobby: () => {
+      showScreen("lobby");
+      return mountLobby(code, uid);
+    },
+    deckBuilding: () => {
+      showScreen("deck");
+      return mountDeckBuilding(code, uid);
+    },
+  };
+  const mount = mounts[phase];
+  if (!mount) return;
+  if (screenCleanup) screenCleanup();
+  screenCleanup = mount();
+}
+
+function enterRoom(code, uid) {
   // Reflect the room in the URL so it's a shareable/back-navigable link.
   history.replaceState(null, "", `?room=${code}`);
-  lobbyCleanup = mountLobby(code, uid);
-  showScreen("lobby");
+  currentPhase = null;
+  if (roomUnwatch) roomUnwatch();
+  roomUnwatch = watchMeta(code, (meta) => {
+    if (!meta || meta.phase === currentPhase) return;
+    currentPhase = meta.phase;
+    routeToPhase(meta.phase, code, uid);
+  });
 }
 
 async function onConfirm() {
@@ -66,7 +94,7 @@ async function onConfirm() {
       intent === "create"
         ? await createRoom(name)
         : await joinRoom(pendingCode, name);
-    await enterLobby(res.code, res.uid);
+    enterRoom(res.code, res.uid);
   } catch (e) {
     setError("name-error", e.message || "Something went wrong.");
   } finally {

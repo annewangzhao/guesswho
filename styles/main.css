@@ -232,3 +232,69 @@ body {
   padding: 2px 8px;
 }
 .waiting { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+/* ---- Deck building ---- */
+.deck-layout { width: 100%; max-width: 880px; text-align: left; }
+.deck-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.deck-title { margin: 2px 0 4px; font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 800; }
+.deck-sub { margin: 0; color: var(--text-muted); }
+
+.add-character {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 8px;
+}
+.add-character .input { flex: 1; min-width: 150px; width: auto; }
+.photo-btn { flex: none; }
+.photo-preview {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex: none;
+}
+
+.board-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  margin-top: 20px;
+}
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.tile-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  background: var(--bg);
+}
+.tile-name {
+  display: block;
+  padding: 8px 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.board-empty { color: var(--text-muted); text-align: center; margin-top: 30px; }
