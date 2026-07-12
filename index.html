@@ -9,11 +9,34 @@
 <body>
   <div id="app">
 
-    <!-- Landing: enter name, then create or join a room -->
+    <!-- Home: join-with-code OR create. No name field here (that's the next step). -->
     <section class="screen" id="screen-landing" data-active="true">
       <div class="card">
         <h1 class="title">Guess Who</h1>
         <p class="tagline">A party game for you and your friends.</p>
+
+        <div class="join-block">
+          <span class="field-label">Have a room code?</span>
+          <div class="join-row">
+            <input id="code-input" class="input input-code" type="text" maxlength="4"
+                   placeholder="CODE" autocomplete="off" spellcheck="false" />
+            <button class="btn btn-primary" id="join-btn" type="button">Join</button>
+          </div>
+        </div>
+
+        <div class="divider"><span>or</span></div>
+
+        <button class="btn btn-ghost btn-block" id="create-btn" type="button">Create a room</button>
+
+        <p class="error" id="landing-error" hidden></p>
+      </div>
+    </section>
+
+    <!-- Name step: reached after choosing create or join -->
+    <section class="screen" id="screen-name">
+      <div class="card">
+        <button class="back-link" id="name-back" type="button">← Back</button>
+        <h2 class="screen-title" id="name-context">Your name</h2>
 
         <label class="field">
           <span class="field-label">Your name</span>
@@ -21,19 +44,8 @@
                  placeholder="e.g. Mary Jane" autocomplete="off" />
         </label>
 
-        <div class="actions">
-          <button class="btn btn-primary" id="create-btn" type="button">Create room</button>
-        </div>
-
-        <div class="divider"><span>or join one</span></div>
-
-        <div class="join-row">
-          <input id="code-input" class="input input-code" type="text" maxlength="4"
-                 placeholder="CODE" autocomplete="off" spellcheck="false" />
-          <button class="btn btn-ghost" id="join-btn" type="button">Join</button>
-        </div>
-
-        <p class="error" id="landing-error" hidden></p>
+        <button class="btn btn-primary btn-block" id="confirm-btn" type="button">Continue</button>
+        <p class="error" id="name-error" hidden></p>
       </div>
     </section>
 
@@ -48,7 +60,7 @@
         <ul class="player-list" id="player-list"></ul>
 
         <div class="actions">
-          <button class="btn btn-primary" id="start-btn" type="button" hidden>Start game</button>
+          <button class="btn btn-primary btn-block" id="start-btn" type="button" hidden>Start game</button>
           <p class="waiting" id="waiting-note" hidden>Waiting for the host to start…</p>
         </div>
       </div>
