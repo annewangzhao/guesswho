@@ -345,3 +345,36 @@ body {
 .pick-target-name { display: block; font-weight: 700; }
 
 .pick-waiting-emoji { font-size: 2.4rem; margin-bottom: 8px; }
+
+/* ---- Guessing (tile interaction) ---- */
+.guess-tile {
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  position: relative;
+  transition: opacity 0.12s ease, transform 0.08s ease, filter 0.12s ease;
+}
+.guess-tile:not(:disabled):hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.guess-tile.is-eliminated { opacity: 0.4; filter: grayscale(1); }
+.guess-tile.is-eliminated::after {
+  content: "✕";
+  position: absolute;
+  top: 6px; right: 8px;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+.guess-tile.is-pending { outline: 3px solid var(--accent); outline-offset: 2px; }
+.guess-tile.is-guess {
+  outline: 3px solid #2ea043;
+  outline-offset: 2px;
+  opacity: 1;
+  filter: none;
+}
+.guess-tile:disabled { cursor: default; }
+
+.guess-status { color: var(--text-muted); font-size: 0.9rem; min-width: 0; }
+.guess-actions { display: flex; gap: 10px; align-items: center; }

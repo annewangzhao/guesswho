@@ -2,7 +2,7 @@
 // independently randomized order (anti-inference — DESIGN.md §4). The layout is
 // persisted at rooms/{code}/boards/{playerId}/layout so it's stable for the round.
 
-import { db, authReady, ref, get, set, onValue } from "../firebase.js";
+import { db, authReady, ref, get, set, remove, onValue } from "../firebase.js";
 
 // Cryptographically-seeded Fisher–Yates shuffle (returns a new array).
 function shuffle(ids) {
@@ -36,6 +36,20 @@ function sameSet(a, b) {
   if (a.length !== b.length) return false;
   const s = new Set(a);
   return b.every((x) => s.has(x));
+}
+
+// Flip a character down (eliminate) or back up on the current player's board.
+export async function setEliminated(code, characterId, on) {
+  const user = await authReady;
+  const r = ref(db, `rooms/${code}/boards/${user.uid}/eliminated/${characterId}`);
+  if (on) await set(r, true);
+  else await remove(r);
+}
+
+// Lock in the current player's single final guess.
+export async function lockGuess(code, characterId) {
+  const user = await authReady;
+  await set(ref(db, `rooms/${code}/boards/${user.uid}/finalGuess`), characterId);
 }
 
 // Watch a player's board (layout + eliminated + finalGuess). Returns unsubscribe.
