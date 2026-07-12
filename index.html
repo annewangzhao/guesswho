@@ -66,6 +66,35 @@
       </div>
     </section>
 
+    <!-- Deck building: everyone adds characters (name + photo); board syncs live -->
+    <section class="screen" id="screen-deck">
+      <div class="deck-layout">
+        <header class="deck-header">
+          <div>
+            <p class="lobby-eyebrow">Room <span id="deck-code"></span></p>
+            <h2 class="deck-title">Build the board</h2>
+            <p class="deck-sub">Everyone adds the people they know — they appear for all players live.</p>
+          </div>
+          <button class="btn btn-primary" id="deck-continue-btn" type="button" hidden>Continue</button>
+        </header>
+
+        <form class="add-character" id="add-character-form">
+          <input id="char-name" class="input" type="text" maxlength="40"
+                 placeholder="Character name" autocomplete="off" />
+          <img id="photo-preview" class="photo-preview" alt="" hidden />
+          <label class="btn btn-ghost photo-btn" id="photo-picker">
+            <input id="char-photo" type="file" accept="image/*" hidden />
+            <span id="photo-label">📷 Photo</span>
+          </label>
+          <button class="btn btn-primary" id="add-char-btn" type="submit">Add</button>
+        </form>
+        <p class="error" id="deck-error" hidden></p>
+
+        <div class="board-grid" id="board-grid"></div>
+        <p class="board-empty" id="board-empty">No characters yet — add the first one!</p>
+      </div>
+    </section>
+
   </div>
 
   <script type="module" src="./src/main.js"></script>

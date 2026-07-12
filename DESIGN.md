@@ -124,7 +124,13 @@ engaged.
   "many" gracefully.
   - Design implication: build the board as a **responsive auto-fitting grid**
     (e.g. CSS grid with `auto-fit`/`minmax`, tile size clamped for readability).
-- Storage: **Firebase Storage** for images; character metadata in the DB.
+- **Storage decision: compressed data URLs in the Realtime Database** (not
+  Firebase Storage). Photos are resized/re-encoded in the browser to a small
+  (~≤40KB) JPEG thumbnail ([src/game/image.js](src/game/image.js)) and stored
+  as a data URL in the `imageUrl` field. Keeps the project **free on Spark** (no
+  Blaze/credit card, no separate Storage product) and photos sync live like all
+  other room state. Trade-off: fine for a small friends game; not for large/many
+  full-res images.
 - ⚠️ **OPEN (minor):** Any cap to protect layout/perf (e.g. soft max ~40)? Can
   decide during build.
 - ⚠️ **OPEN:** Can characters be added/edited *after* the round starts, or is the
@@ -212,7 +218,7 @@ rooms/
     deck/                            // the shared, collaboratively-built character set
       {characterId}/
         name:      "Bob"
-        imageUrl:  "https://.../bob.jpg"   // Firebase Storage URL
+        imageUrl:  "data:image/jpeg;base64,..."  // compressed thumbnail (§7)
         addedBy:   "<playerId>"
         addedAt:   <serverTimestamp>
     boards/                          // one per player; positions randomized per player (§4)
