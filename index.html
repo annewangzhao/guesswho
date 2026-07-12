@@ -150,10 +150,16 @@
         </div>
       </div>
 
-      <!-- Host view (watching comes in a later step) -->
-      <div class="card" id="guess-host" hidden>
-        <div class="pick-waiting-emoji">👀</div>
-        <p class="waiting">Guessers are working it out…</p>
+      <!-- Host view: watch the guessers' boards from behind -->
+      <div class="pick-layout" id="guess-host" hidden>
+        <header class="deck-header">
+          <div>
+            <p class="lobby-eyebrow">Room <span id="watch-code"></span></p>
+            <h2 class="deck-title">Watching the guessers</h2>
+            <p class="deck-sub">You see their boards from behind — flips happen live, but not who.</p>
+          </div>
+        </header>
+        <div class="watch-boards" id="watch-boards"></div>
       </div>
     </section>
 
