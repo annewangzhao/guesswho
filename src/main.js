@@ -4,6 +4,7 @@ import { showScreen } from "./ui/screens.js";
 import { createRoom, joinRoom, normalizeCode, watchMeta } from "./game/room.js";
 import { mountLobby } from "./ui/lobby.js";
 import { mountDeckBuilding } from "./ui/deck.js";
+import { mountHostPick } from "./ui/hostpick.js";
 
 let intent = null; // "create" | "join"
 let pendingCode = ""; // room code when joining
@@ -62,6 +63,10 @@ function routeToPhase(phase, code, uid) {
     deckBuilding: () => {
       showScreen("deck");
       return mountDeckBuilding(code, uid);
+    },
+    hostPick: () => {
+      showScreen("hostpick");
+      return mountHostPick(code, uid);
     },
   };
   const mount = mounts[phase];
