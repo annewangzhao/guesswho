@@ -4,6 +4,7 @@ import { showScreen } from "@/ui/screens.js";
 import { createRoom, joinRoom, normalizeCode, watchMeta } from "@/game/room.js";
 import { mountLobby } from "@/ui/lobby.js";
 import { mountDeckBuilding } from "@/ui/deck.js";
+import { mountMasterSelect } from "@/ui/masterselect.js";
 import { mountHostPick } from "@/ui/hostpick.js";
 import { mountGuessing } from "@/ui/guessing.js";
 import { mountReveal } from "@/ui/reveal.js";
@@ -65,6 +66,10 @@ function routeToPhase(phase, code, uid) {
     deckBuilding: () => {
       showScreen("deck");
       return mountDeckBuilding(code, uid);
+    },
+    masterSelect: () => {
+      showScreen("masterselect");
+      return mountMasterSelect(code, uid);
     },
     hostPick: () => {
       showScreen("hostpick");

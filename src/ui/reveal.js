@@ -2,7 +2,7 @@
 // marked correct/incorrect against the revealed target.
 
 import { watchDeck } from "@/game/deck.js";
-import { watchPlayers, watchRevealedTarget } from "@/game/room.js";
+import { watchPlayers, watchRevealedTarget, watchMaster } from "@/game/room.js";
 import { watchBoard } from "@/game/board.js";
 
 export function mountReveal(code, myUid) {
@@ -14,7 +14,9 @@ export function mountReveal(code, myUid) {
 
   let deckMap = {};
   let targetId = null;
-  let guessers = []; // [{ id, name }]
+  let masterId = null;
+  let allPlayers = [];
+  let guessers = []; // [{ id, name }] — everyone except the master
   const boards = {}; // guesserId -> board data
   const boardUnsubs = {};
 
@@ -116,8 +118,10 @@ export function mountReveal(code, myUid) {
     targetId = t;
     render();
   });
-  const unwatchPlayers = watchPlayers(code, (players) => {
-    guessers = players.filter((p) => p.role === "guesser").map((p) => ({ id: p.id, name: p.name }));
+  function recomputeGuessers() {
+    guessers = allPlayers
+      .filter((p) => p.id !== masterId)
+      .map((p) => ({ id: p.id, name: p.name }));
     for (const g of guessers) {
       if (!boardUnsubs[g.id]) {
         boardUnsubs[g.id] = watchBoard(code, g.id, (b) => {
@@ -127,6 +131,15 @@ export function mountReveal(code, myUid) {
       }
     }
     render();
+  }
+
+  const unwatchPlayers = watchPlayers(code, (players) => {
+    allPlayers = players;
+    recomputeGuessers();
+  });
+  const unwatchMaster = watchMaster(code, (m) => {
+    masterId = m;
+    recomputeGuessers();
   });
 
   newGameBtn.onclick = () => {
@@ -137,6 +150,7 @@ export function mountReveal(code, myUid) {
     unwatchDeck();
     unwatchTarget();
     unwatchPlayers();
+    unwatchMaster();
     for (const unsub of Object.values(boardUnsubs)) unsub();
     newGameBtn.onclick = null;
     boardsEl.innerHTML = "";

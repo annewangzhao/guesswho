@@ -77,6 +77,11 @@ test("reveal shows the answer and marks each guesser correct/incorrect", async (
   );
   await host.evaluate(
     async ({ code, targetId }) => {
+      // Host is the master this round: set masterId first so the target write
+      // is allowed, then set the target and start guessing.
+      const { db, authReady, ref, set } = await import("@/firebase.js");
+      const u = await authReady;
+      await set(ref(db, `rooms/${code}/round/masterId`), u.uid);
       const { setTarget, setPhase } = await import("@/game/room.js");
       await setTarget(code, targetId);
       await setPhase(code, "guessing");

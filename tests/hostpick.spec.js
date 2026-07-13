@@ -43,11 +43,17 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
   await expect(host.locator("#screen-deck")).toHaveAttribute("data-active", "true");
   await seedDeck(host, code, ["Zed", "Mona", "Cy"]);
   await expect(host.locator("#board-grid .tile")).toHaveCount(3);
-  // Everyone marks done uploading -> auto-advance.
-  await g1.click("#deck-done-btn");
-  await host.click("#deck-done-btn");
+  // Make the host the master and jump to the pick (the done-gate and master-
+  // select animation are covered by their own tests).
+  await host.evaluate(async (code) => {
+    const { db, authReady, ref, set } = await import("@/firebase.js");
+    const u = await authReady;
+    await set(ref(db, `rooms/${code}/round/masterId`), u.uid);
+    const { setPhase } = await import("@/game/room.js");
+    await setPhase(code, "hostPick");
+  }, code);
 
-  // Host sees the gallery; guesser sees the waiting view.
+  // Master (host) sees the gallery; the other player sees the waiting view.
   await expect(host.locator("#pick-host")).toBeVisible();
   await expect(host.locator("#pick-grid .pick-tile")).toHaveCount(3);
   await expect(g1.locator("#pick-waiting")).toBeVisible();

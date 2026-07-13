@@ -120,9 +120,44 @@ export async function setDeckReady(code, ready) {
   await set(ref(db, `rooms/${code}/players/${user.uid}/deckReady`), !!ready);
 }
 
-// Host-only (enforced by rules): set the target character for the round.
+// Master-only (enforced by rules): set the target character for the round.
 export async function setTarget(code, characterId) {
   await set(ref(db, `rooms/${code}/round/targetCharacterId`), characterId);
+}
+
+// --- Character master rotation ---------------------------------------------
+// A fixed, randomly-ordered rotation established once. Each round advances one
+// step and wraps around, so everyone masters once before anyone repeats.
+
+function shuffle(ids) {
+  const a = ids.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Coordinator-only: ensure a rotation exists (shuffled from the given players)
+// and set the current round's master to the rotation's current position.
+export async function ensureRotationAndPickMaster(code, playerIds) {
+  const rotationRef = ref(db, `rooms/${code}/rotation`);
+  const snap = await get(rotationRef);
+  let rot = snap.val();
+  if (!rot || !Array.isArray(rot.order) || rot.order.length === 0) {
+    rot = { order: shuffle(playerIds), index: 0 };
+    await set(rotationRef, rot);
+  }
+  const masterId = rot.order[rot.index % rot.order.length];
+  await set(ref(db, `rooms/${code}/round/masterId`), masterId);
+  return masterId;
+}
+
+// Watch the current round's character master (playerId, or null). Unsubscribe.
+export function watchMaster(code, cb) {
+  return onValue(ref(db, `rooms/${code}/round/masterId`), (snap) =>
+    cb(snap.val() || null)
+  );
 }
 
 // A guesser signals they're ready to reveal.

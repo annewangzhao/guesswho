@@ -47,7 +47,11 @@ test("a guesser flips tiles and locks in one final guess", async ({ browser }) =
     { code, img: TINY_JPEG }
   );
   await expect(host.locator("#board-grid .tile")).toHaveCount(5);
+  // Host is the master; the guesser (g1) is the one whose board we drive.
   await host.evaluate(async (code) => {
+    const { db, authReady, ref, set } = await import("@/firebase.js");
+    const u = await authReady;
+    await set(ref(db, `rooms/${code}/round/masterId`), u.uid);
     const { setPhase } = await import("@/game/room.js");
     await setPhase(code, "guessing");
   }, code);

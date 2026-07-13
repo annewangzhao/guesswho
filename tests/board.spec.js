@@ -48,8 +48,12 @@ test("each guesser gets the same characters in a different, persisted order", as
   );
   await expect(host.locator("#board-grid .tile")).toHaveCount(8);
 
-  // Jump straight to guessing (host-pick UI is covered by its own test).
+  // Make the host the master, then jump straight to guessing (the master-select
+  // + pick UI are covered by their own tests). The two guessers are the others.
   await host.evaluate(async (code) => {
+    const { db, authReady, ref, set } = await import("@/firebase.js");
+    const u = await authReady;
+    await set(ref(db, `rooms/${code}/round/masterId`), u.uid);
     const { setPhase } = await import("@/game/room.js");
     await setPhase(code, "guessing");
   }, code);

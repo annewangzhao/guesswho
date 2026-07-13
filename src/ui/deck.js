@@ -3,7 +3,12 @@
 
 import { addCharacter, watchDeck } from "@/game/deck.js";
 import { fileToThumbnail } from "@/game/image.js";
-import { watchPlayers, setDeckReady, setPhase } from "@/game/room.js";
+import {
+  watchPlayers,
+  setDeckReady,
+  setPhase,
+  ensureRotationAndPickMaster,
+} from "@/game/room.js";
 
 export function mountDeckBuilding(code, myUid) {
   const nameInput = document.getElementById("char-name");
@@ -119,10 +124,13 @@ export function mountDeckBuilding(code, myUid) {
       waitingEl.textContent = `Waiting for other players… (${readyCount}/${present.length} done)`;
     }
 
+    // The room host coordinates the transition: pick the round's master (from
+    // the rotation) and advance everyone to the master-select animation.
     const allReady = present.length > 0 && readyCount === present.length;
-    if (allReady && deckCount > 0 && !advanced) {
+    if (allReady && deckCount > 0 && !advanced && me?.role === "host") {
       advanced = true;
-      setPhase(code, "hostPick"); // #7 picks up here (becomes master-select in PR2)
+      const ids = present.map((p) => p.id);
+      ensureRotationAndPickMaster(code, ids).then(() => setPhase(code, "masterSelect"));
     }
   });
 
