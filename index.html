@@ -4,23 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Guess Who</title>
-  <link rel="stylesheet" href="./styles/main.css?v=d057049544" />
+  <link rel="stylesheet" href="./styles/main.css?v=03475abc06" />
   <!--IMPORTMAP-->
   <script type="importmap">
     {
       "imports": {
-        "@/firebase.js": "./src/firebase.js?v=d057049544",
-        "@/game/board.js": "./src/game/board.js?v=d057049544",
-        "@/game/deck.js": "./src/game/deck.js?v=d057049544",
-        "@/game/image.js": "./src/game/image.js?v=d057049544",
-        "@/game/room.js": "./src/game/room.js?v=d057049544",
-        "@/main.js": "./src/main.js?v=d057049544",
-        "@/ui/deck.js": "./src/ui/deck.js?v=d057049544",
-        "@/ui/guessing.js": "./src/ui/guessing.js?v=d057049544",
-        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=d057049544",
-        "@/ui/lobby.js": "./src/ui/lobby.js?v=d057049544",
-        "@/ui/reveal.js": "./src/ui/reveal.js?v=d057049544",
-        "@/ui/screens.js": "./src/ui/screens.js?v=d057049544"
+        "@/firebase.js": "./src/firebase.js?v=03475abc06",
+        "@/game/board.js": "./src/game/board.js?v=03475abc06",
+        "@/game/deck.js": "./src/game/deck.js?v=03475abc06",
+        "@/game/image.js": "./src/game/image.js?v=03475abc06",
+        "@/game/room.js": "./src/game/room.js?v=03475abc06",
+        "@/main.js": "./src/main.js?v=03475abc06",
+        "@/ui/deck.js": "./src/ui/deck.js?v=03475abc06",
+        "@/ui/guessing.js": "./src/ui/guessing.js?v=03475abc06",
+        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=03475abc06",
+        "@/ui/lobby.js": "./src/ui/lobby.js?v=03475abc06",
+        "@/ui/masterselect.js": "./src/ui/masterselect.js?v=03475abc06",
+        "@/ui/reveal.js": "./src/ui/reveal.js?v=03475abc06",
+        "@/ui/screens.js": "./src/ui/screens.js?v=03475abc06"
       }
     }
   </script>
@@ -118,7 +119,17 @@
       </div>
     </section>
 
-    <!-- Host picks the target (host sees gallery; guessers wait) -->
+    <!-- Character master selection: shuffle through names, land on the master -->
+    <section class="screen" id="screen-masterselect">
+      <div class="card master-card">
+        <p class="lobby-eyebrow">Character master</p>
+        <p class="master-sentence">
+          <span class="master-name" id="master-name">…</span><span class="master-rest" id="master-rest"></span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Master picks the target (master sees gallery; others wait) -->
     <section class="screen" id="screen-hostpick">
       <!-- Host view -->
       <div class="pick-layout" id="pick-host" hidden>

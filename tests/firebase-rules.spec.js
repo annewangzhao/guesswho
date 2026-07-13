@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
 
-// The core security property: only the host may read round/targetCharacterId.
-// We use two separate browser contexts = two separate anonymous users (a host and
-// a guesser) and confirm the host can read the answer while the guesser is denied.
+// The core security property: only the round's master may read
+// round/targetCharacterId. We use two separate browser contexts = two separate
+// anonymous users (a master and a guesser) and confirm the master can read the
+// answer while the guesser is denied.
 
-test("only the host can read the target; guessers are denied", async ({ browser }) => {
+test("only the master can read the target; guessers are denied", async ({ browser }) => {
   const hostCtx = await browser.newContext();
   const guestCtx = await browser.newContext();
   const hostPage = await hostCtx.newPage();
@@ -14,13 +15,15 @@ test("only the host can read the target; guessers are denied", async ({ browser 
 
   const roomCode = `_SEC_${Date.now()}`;
 
-  // Host creates the room, sets the target, and reads it back (should succeed).
+  // Master creates the room, becomes the round master, sets the target, and
+  // reads it back (should succeed).
   const host = await hostPage.evaluate(async (roomCode) => {
     const { db, authReady, ref, set, get } = await import("@/firebase.js");
     const user = await authReady;
     await set(ref(db, `rooms/${roomCode}/meta`), {
       code: "_SEC_", hostId: user.uid, phase: "guessing",
     });
+    await set(ref(db, `rooms/${roomCode}/round/masterId`), user.uid);
     await set(ref(db, `rooms/${roomCode}/round/targetCharacterId`), "char_secret");
     const snap = await get(ref(db, `rooms/${roomCode}/round/targetCharacterId`));
     return { uid: user.uid, hostRead: snap.val() };
@@ -48,11 +51,12 @@ test("only the host can read the target; guessers are denied", async ({ browser 
     return snap.val();
   }, roomCode);
 
-  // Cleanup (order matters: remove the target while meta/hostId still proves we're
-  // the host, THEN remove meta).
+  // Cleanup (order matters: remove the target while round/masterId still proves
+  // we're the master, THEN remove masterId + meta).
   await hostPage.evaluate(async (roomCode) => {
     const { db, ref, remove } = await import("@/firebase.js");
     await remove(ref(db, `rooms/${roomCode}/round/targetCharacterId`));
+    await remove(ref(db, `rooms/${roomCode}/round/masterId`));
     await remove(ref(db, `rooms/${roomCode}/meta`));
   }, roomCode);
 

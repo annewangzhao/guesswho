@@ -355,6 +355,26 @@ body {
 
 .pick-waiting-emoji { font-size: 2.4rem; margin-bottom: 8px; }
 
+/* ---- Character-master selection ---- */
+.master-card { text-align: center; padding: 48px 40px; }
+.master-sentence {
+  font-size: clamp(1.5rem, 5vw, 2.3rem);
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 12px 0 0;
+  min-height: 1.3em;
+}
+.master-name { color: var(--accent); font-weight: 800; }
+.master-name.is-landed {
+  display: inline-block;
+  animation: master-pop 0.35s ease;
+}
+@keyframes master-pop {
+  0% { transform: scale(0.7); opacity: 0.4; }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* ---- Guessing (tile interaction) ---- */
 .guess-tile {
   padding: 0;

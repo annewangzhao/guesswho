@@ -1,8 +1,9 @@
-// Host-pick screen: the host secretly chooses the target from a gallery of the
-// deck; the pick minimizes to a bottom bar. Guessers see a waiting view.
+// Master-pick screen: the round's character master secretly chooses the target
+// from a gallery of the deck; the pick minimizes to a bottom bar. Everyone else
+// sees a waiting view.
 
 import { watchDeck } from "@/game/deck.js";
-import { watchMeta, watchPlayers, setTarget, setPhase } from "@/game/room.js";
+import { watchMaster, watchPlayers, setTarget, setPhase } from "@/game/room.js";
 
 export function mountHostPick(code, myUid) {
   const hostView = document.getElementById("pick-host");
@@ -12,15 +13,22 @@ export function mountHostPick(code, myUid) {
   const targetPhoto = document.getElementById("pick-target-photo");
   const targetName = document.getElementById("pick-target-name");
   const startBtn = document.getElementById("pick-start-btn");
-  const hostNameEl = document.getElementById("pick-host-name");
+  const masterNameEl = document.getElementById("pick-host-name");
   document.getElementById("pick-code").textContent = code;
 
-  let isHost = null;
+  let isMaster = null;
+  let masterId = null;
+  let players = [];
   let deck = [];
   let selectedId = null;
 
+  function updateMasterName() {
+    const master = players.find((p) => p.id === masterId);
+    if (master) masterNameEl.textContent = master.name;
+  }
+
   function renderGrid() {
-    if (!isHost) return;
+    if (!isMaster) return;
     grid.innerHTML = "";
     for (const c of deck) {
       const tile = document.createElement("button");
@@ -52,7 +60,7 @@ export function mountHostPick(code, myUid) {
       targetName.textContent = c.name;
       bar.hidden = false;
     }
-    await setTarget(code, id); // host-only per rules
+    await setTarget(code, id); // master-only per rules
   }
 
   startBtn.onclick = async () => {
@@ -65,15 +73,16 @@ export function mountHostPick(code, myUid) {
     }
   };
 
-  const unwatchMeta = watchMeta(code, (meta) => {
-    if (!meta) return;
-    const host = meta.hostId === myUid;
-    if (host !== isHost) {
-      isHost = host;
-      hostView.hidden = !host;
-      waitView.hidden = host;
-      if (host) renderGrid();
+  const unwatchMaster = watchMaster(code, (m) => {
+    masterId = m;
+    const master = m === myUid;
+    if (master !== isMaster) {
+      isMaster = master;
+      hostView.hidden = !master;
+      waitView.hidden = master;
+      if (master) renderGrid();
     }
+    updateMasterName();
   });
 
   const unwatchDeck = watchDeck(code, (chars) => {
@@ -81,13 +90,13 @@ export function mountHostPick(code, myUid) {
     renderGrid();
   });
 
-  const unwatchPlayers = watchPlayers(code, (players) => {
-    const host = players.find((p) => p.role === "host");
-    if (host) hostNameEl.textContent = host.name;
+  const unwatchPlayers = watchPlayers(code, (ps) => {
+    players = ps;
+    updateMasterName();
   });
 
   return function cleanup() {
-    unwatchMeta();
+    unwatchMaster();
     unwatchDeck();
     unwatchPlayers();
     startBtn.onclick = null;

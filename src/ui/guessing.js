@@ -4,7 +4,7 @@
 
 import { watchDeck } from "@/game/deck.js";
 import {
-  watchMeta,
+  watchMaster,
   watchPlayers,
   setReveal,
   publishTargetAndReveal,
@@ -29,7 +29,8 @@ export function mountGuessing(code, myUid) {
   const revealBtn = document.getElementById("guess-reveal-btn");
   document.getElementById("guess-code").textContent = code;
 
-  let isHost = null;
+  let isMaster = null;
+  let masterId = null;
   let deckMap = {};
   let deckIds = [];
   let layout = [];
@@ -158,7 +159,7 @@ export function mountGuessing(code, myUid) {
   // the phase to reveal. (Only the host can read/publish the secret target.)
   let revealTriggered = false;
   async function maybeTriggerReveal() {
-    if (isHost !== true || revealTriggered) return;
+    if (isMaster !== true || revealTriggered) return;
     if (!watchGuessers.length) return;
     if (!watchGuessers.every((g) => revealFlags[g.id])) return;
     revealTriggered = true;
@@ -167,8 +168,8 @@ export function mountGuessing(code, myUid) {
 
   revealFlagsUnsub = watchRevealFlags(code, (flags) => {
     revealFlags = flags;
-    if (isHost === false) render(); // refresh the guesser's controls
-    else if (isHost === true) {
+    if (isMaster === false) render(); // refresh the guesser's controls
+    else if (isMaster === true) {
       renderWatch();
       maybeTriggerReveal();
     }
@@ -230,8 +231,9 @@ export function mountGuessing(code, myUid) {
     watchSetup = true;
     document.getElementById("watch-code").textContent = code;
     watchPlayersUnsub = watchPlayers(code, (players) => {
+      // The round's guessers are everyone except the master.
       watchGuessers = players
-        .filter((p) => p.role === "guesser")
+        .filter((p) => p.id !== masterId)
         .map((p) => ({ id: p.id, name: p.name }));
       // Subscribe to any guesser boards we're not watching yet.
       for (const g of watchGuessers) {
@@ -249,7 +251,7 @@ export function mountGuessing(code, myUid) {
 
   // Once we know we're a guesser and have the deck, ensure a layout + subscribe.
   async function maybeSetupBoard() {
-    if (isHost !== false || !deckIds.length || boardUnsub) return;
+    if (isMaster !== false || !deckIds.length || boardUnsub) return;
     layout = await ensureBoardLayout(code, deckIds);
     boardUnsub = watchBoard(code, myUid, (board) => {
       if (Array.isArray(board.layout)) layout = board.layout;
@@ -261,14 +263,14 @@ export function mountGuessing(code, myUid) {
     render();
   }
 
-  const unwatchMeta = watchMeta(code, (meta) => {
-    if (!meta) return;
-    const host = meta.hostId === myUid;
-    if (host !== isHost) {
-      isHost = host;
-      hostView.hidden = !host;
-      guesserView.hidden = host;
-      if (host) setupHostWatch();
+  const unwatchMaster = watchMaster(code, (m) => {
+    masterId = m;
+    const master = m === myUid;
+    if (master !== isMaster) {
+      isMaster = master;
+      hostView.hidden = !master;
+      guesserView.hidden = master;
+      if (master) setupHostWatch();
       else maybeSetupBoard();
     }
   });
@@ -280,7 +282,7 @@ export function mountGuessing(code, myUid) {
   });
 
   return function cleanup() {
-    unwatchMeta();
+    unwatchMaster();
     unwatchDeck();
     if (boardUnsub) boardUnsub();
     if (revealFlagsUnsub) revealFlagsUnsub();

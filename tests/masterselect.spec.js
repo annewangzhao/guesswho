@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-// Issue #9: the host watches the guessers' boards "from behind" — live flips,
-// but no character identities are revealed.
+// Issue #26 (PR2): once everyone is done uploading, a random character master
+// is selected (from the rotation) and everyone advances to the pick screen —
+// the master sees the gallery, the others wait.
 
 const TINY_JPEG =
   "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////" +
@@ -21,7 +22,7 @@ async function join(page, code, name) {
   await expect(page.locator("#screen-lobby")).toHaveAttribute("data-active", "true");
 }
 
-test("host watches guessers' boards from behind: live flips, identities hidden", async ({ browser }) => {
+test("done gate -> random master selected -> master picks, others wait", async ({ browser }) => {
   const hostCtx = await browser.newContext();
   const g1Ctx = await browser.newContext();
   const g2Ctx = await browser.newContext();
@@ -38,60 +39,58 @@ test("host watches guessers' boards from behind: live flips, identities hidden",
 
   await join(g1, code, "Bo");
   await join(g2, code, "Cai");
-  const g1Uid = await uid(g1);
-  const g2Uid = await uid(g2);
+  const byUid = {
+    [await uid(host)]: host,
+    [await uid(g1)]: g1,
+    [await uid(g2)]: g2,
+  };
 
-  // Seed a deck of 6 and jump to guessing.
   await host.click("#start-btn");
   await expect(host.locator("#screen-deck")).toHaveAttribute("data-active", "true");
   await host.evaluate(
     async ({ code, img }) => {
       const { addCharacter } = await import("@/game/deck.js");
-      for (const n of ["A", "B", "C", "D", "E", "F"]) await addCharacter(code, n, img);
+      for (const n of ["A", "B", "C"]) await addCharacter(code, n, img);
     },
     { code, img: TINY_JPEG }
   );
-  await expect(host.locator("#board-grid .tile")).toHaveCount(6);
-  // Host is the master this round; the two guessers are the others.
-  await host.evaluate(async (code) => {
-    const { db, authReady, ref, set } = await import("@/firebase.js");
-    const u = await authReady;
-    await set(ref(db, `rooms/${code}/round/masterId`), u.uid);
-    const { setPhase } = await import("@/game/room.js");
-    await setPhase(code, "guessing");
+  await expect(host.locator("#board-grid .tile")).toHaveCount(3);
+
+  // Everyone marks done -> master-select for all.
+  await g1.click("#deck-done-btn");
+  await g2.click("#deck-done-btn");
+  await host.click("#deck-done-btn");
+
+  for (const pg of [host, g1, g2]) {
+    await expect(pg.locator("#screen-masterselect")).toHaveAttribute("data-active", "true");
+  }
+
+  // A master was chosen from the players.
+  const masterId = await host.evaluate(async (code) => {
+    const { db, ref, get } = await import("@/firebase.js");
+    const snap = await get(ref(db, `rooms/${code}/round/masterId`));
+    return snap.val();
   }, code);
+  expect(Object.keys(byUid)).toContain(masterId);
 
-  // Host sees a back-board per guesser.
-  await expect(host.locator("#watch-boards .watch-board")).toHaveCount(2);
-  const g1board = host.locator(`.watch-board[data-guesser-id="${g1Uid}"]`);
-  const g2board = host.locator(`.watch-board[data-guesser-id="${g2Uid}"]`);
-  await expect(g1board.locator(".back-tile")).toHaveCount(6);
+  // After the shuffle animation, everyone advances to the pick screen.
+  for (const pg of [host, g1, g2]) {
+    await expect(pg.locator("#screen-hostpick")).toHaveAttribute("data-active", "true", {
+      timeout: 8000,
+    });
+  }
 
-  // Identities are hidden: no photos, no names anywhere in the watch view.
-  await expect(host.locator("#watch-boards img")).toHaveCount(0);
-  await expect(host.locator("#watch-boards .tile-name")).toHaveCount(0);
-
-  // Guessers flip tiles -> host sees the flips live (as face-down backs).
-  await g1.locator("#guess-grid .guess-tile").nth(0).click();
-  await g1.locator("#guess-grid .guess-tile").nth(1).click();
-  await g2.locator("#guess-grid .guess-tile").nth(3).click();
-  await expect(g1board.locator(".back-tile.is-down")).toHaveCount(2);
-  await expect(g2board.locator(".back-tile.is-down")).toHaveCount(1);
-
-  // A guesser locking in shows a badge on the host's view (but not who).
-  await g1.click("#guess-lock-btn");
-  await g1.locator("#guess-grid .guess-tile").nth(4).click();
-  await g1.click("#guess-confirm-btn");
-  await expect(g1board.locator(".watch-badge")).toBeVisible();
-  // Still no identity leak after locking.
-  await expect(host.locator("#watch-boards img")).toHaveCount(0);
+  // The chosen master sees the gallery; a non-master sees the waiting view.
+  const masterPage = byUid[masterId];
+  const nonMaster = [host, g1, g2].find((p) => p !== masterPage);
+  await expect(masterPage.locator("#pick-host")).toBeVisible();
+  await expect(nonMaster.locator("#pick-waiting")).toBeVisible();
 
   // Cleanup.
   for (const [pg, ctx] of [[g1, g1Ctx], [g2, g2Ctx]]) {
     await pg.evaluate(async (code) => {
       const { db, authReady, ref, remove } = await import("@/firebase.js");
       const u = await authReady;
-      await remove(ref(db, `rooms/${code}/boards/${u.uid}`));
       await remove(ref(db, `rooms/${code}/players/${u.uid}`));
     }, code);
     await ctx.close();
@@ -99,6 +98,8 @@ test("host watches guessers' boards from behind: live flips, identities hidden",
   await host.evaluate(async (code) => {
     const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
+    await remove(ref(db, `rooms/${code}/round/masterId`));
+    await remove(ref(db, `rooms/${code}/rotation`));
     await remove(ref(db, `rooms/${code}/deck`));
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
     await remove(ref(db, `rooms/${code}/meta`));

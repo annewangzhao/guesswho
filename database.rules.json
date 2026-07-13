@@ -42,19 +42,29 @@
           }
         },
 
+        "rotation": {
+          ".read": "auth != null",
+          ".write": "auth != null"
+        },
+
         "round": {
+          "masterId": {
+            ".read": "auth != null",
+            ".write": "auth != null",
+            ".validate": "newData.isString() && newData.val().length <= 128"
+          },
           "revealFlags": {
             ".read": "auth != null",
             ".write": "auth != null"
           },
           "targetCharacterId": {
-            ".read":  "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
-            ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
+            ".read":  "auth != null && auth.uid === root.child('rooms').child($roomCode).child('round').child('masterId').val()",
+            ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('round').child('masterId').val()",
             ".validate": "newData.isString() && newData.val().length <= 128"
           },
           "revealedTarget": {
             ".read":  "auth != null",
-            ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
+            ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('round').child('masterId').val()",
             ".validate": "newData.isString() && newData.val().length <= 128"
           }
         }
