@@ -270,7 +270,10 @@ body {
 .board-grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  /* auto-fit + capped width + centered: a handful of tiles stay legibly sized
+     and centered (blank space on both sides); many tiles wrap cleanly. */
+  grid-template-columns: repeat(auto-fit, minmax(108px, 148px));
+  justify-content: center;
   margin-top: 20px;
 }
 .tile {
@@ -301,7 +304,11 @@ body {
 
 /* ---- Host pick ---- */
 .pick-layout { width: 100%; max-width: 880px; text-align: left; padding-bottom: 96px; }
-.pick-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); margin-top: 20px; }
+.pick-grid {
+  grid-template-columns: repeat(auto-fit, minmax(132px, 168px));
+  justify-content: center;
+  margin-top: 20px;
+}
 .pick-tile {
   padding: 0;
   border: 1px solid var(--border);
@@ -482,7 +489,11 @@ body {
 .reveal-badge.is-correct { color: #2ea043; border: 1px solid #2ea043; }
 .reveal-badge.is-wrong { color: #d93f0b; border: 1px solid #d93f0b; }
 
-.reveal-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.reveal-grid {
+  grid-template-columns: repeat(auto-fit, minmax(78px, 104px));
+  justify-content: center;
+  gap: 8px;
+}
 .reveal-tile { position: relative; }
 .reveal-tile.is-eliminated { opacity: 0.4; filter: grayscale(1); }
 .reveal-tile.is-answer { outline: 3px solid #2ea043; outline-offset: 2px; opacity: 1; filter: none; }
