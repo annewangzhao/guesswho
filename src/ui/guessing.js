@@ -3,7 +3,13 @@
 // host's watch view (#9) and the reveal (#10) can read it.
 
 import { watchDeck } from "@/game/deck.js";
-import { watchMeta, watchPlayers } from "@/game/room.js";
+import {
+  watchMeta,
+  watchPlayers,
+  setReveal,
+  publishTargetAndReveal,
+  watchRevealFlags,
+} from "@/game/room.js";
 import {
   ensureBoardLayout,
   watchBoard,
@@ -20,6 +26,7 @@ export function mountGuessing(code, myUid) {
   const lockBtn = document.getElementById("guess-lock-btn");
   const confirmBtn = document.getElementById("guess-confirm-btn");
   const cancelBtn = document.getElementById("guess-cancel-btn");
+  const revealBtn = document.getElementById("guess-reveal-btn");
   document.getElementById("guess-code").textContent = code;
 
   let isHost = null;
@@ -31,6 +38,8 @@ export function mountGuessing(code, myUid) {
   let mode = "eliminate"; // "eliminate" | "selecting"
   let pending = null; // candidate guess while selecting
   let boardUnsub = null;
+  let revealFlags = {}; // { playerId: true }
+  let revealFlagsUnsub = null;
 
   // Host-watch state
   const watchContainer = document.getElementById("watch-boards");
@@ -41,6 +50,7 @@ export function mountGuessing(code, myUid) {
   let watchSetup = false;
 
   const isLocked = () => !!finalGuess;
+  const hasRevealed = () => !!revealFlags[myUid];
 
   function render() {
     grid.innerHTML = "";
@@ -77,11 +87,18 @@ export function mountGuessing(code, myUid) {
   function renderControls() {
     if (isLocked()) {
       const name = deckMap[finalGuess]?.name || "your pick";
-      instruction.textContent = "Guess locked in.";
-      statusEl.textContent = `You guessed ${name} — waiting for the reveal…`;
       lockBtn.hidden = true;
       confirmBtn.hidden = true;
       cancelBtn.hidden = true;
+      if (hasRevealed()) {
+        instruction.textContent = "Revealed!";
+        statusEl.textContent = "Waiting for everyone to reveal…";
+        revealBtn.hidden = true;
+      } else {
+        instruction.textContent = "Guess locked in.";
+        statusEl.textContent = `You guessed ${name}. Ready?`;
+        revealBtn.hidden = false;
+      }
     } else if (mode === "selecting") {
       instruction.textContent = "Tap the character you're guessing.";
       statusEl.textContent = pending
@@ -91,6 +108,7 @@ export function mountGuessing(code, myUid) {
       confirmBtn.hidden = false;
       confirmBtn.disabled = !pending;
       cancelBtn.hidden = false;
+      revealBtn.hidden = true;
     } else {
       instruction.textContent = "Tap to flip down the people you've ruled out.";
       const n = Object.keys(eliminated).length;
@@ -98,6 +116,7 @@ export function mountGuessing(code, myUid) {
       lockBtn.hidden = false;
       confirmBtn.hidden = true;
       cancelBtn.hidden = true;
+      revealBtn.hidden = true;
     }
   }
 
@@ -126,6 +145,34 @@ export function mountGuessing(code, myUid) {
     confirmBtn.disabled = true;
     await lockGuess(code, pending); // finalGuess arrives via watchBoard
   };
+  revealBtn.onclick = async () => {
+    revealBtn.disabled = true;
+    try {
+      await setReveal(code); // revealFlags update arrives via watchRevealFlags
+    } finally {
+      revealBtn.disabled = false;
+    }
+  };
+
+  // When all guessers have revealed, the host publishes the answer and advances
+  // the phase to reveal. (Only the host can read/publish the secret target.)
+  let revealTriggered = false;
+  async function maybeTriggerReveal() {
+    if (isHost !== true || revealTriggered) return;
+    if (!watchGuessers.length) return;
+    if (!watchGuessers.every((g) => revealFlags[g.id])) return;
+    revealTriggered = true;
+    await publishTargetAndReveal(code);
+  }
+
+  revealFlagsUnsub = watchRevealFlags(code, (flags) => {
+    revealFlags = flags;
+    if (isHost === false) render(); // refresh the guesser's controls
+    else if (isHost === true) {
+      renderWatch();
+      maybeTriggerReveal();
+    }
+  });
 
   // ----- Host watch: see each guesser's board from behind (backs only) -----
   function renderWatch() {
@@ -135,6 +182,7 @@ export function mountGuessing(code, myUid) {
       const layout = Array.isArray(b.layout) ? b.layout : [];
       const elim = b.eliminated || {};
       const locked = !!b.finalGuess;
+      const revealed = !!revealFlags[g.id];
 
       const card = document.createElement("div");
       card.className = "watch-board";
@@ -143,10 +191,10 @@ export function mountGuessing(code, myUid) {
       const nameRow = document.createElement("div");
       nameRow.className = "watch-name";
       nameRow.textContent = g.name;
-      if (locked) {
+      if (locked || revealed) {
         const badge = document.createElement("span");
         badge.className = "watch-badge";
-        badge.textContent = "Locked in ✓";
+        badge.textContent = revealed ? "Revealed ✓" : "Locked in ✓";
         nameRow.append(badge);
       }
 
@@ -195,6 +243,7 @@ export function mountGuessing(code, myUid) {
         }
       }
       renderWatch();
+      maybeTriggerReveal(); // guesser list may now be complete
     });
   }
 
@@ -234,9 +283,10 @@ export function mountGuessing(code, myUid) {
     unwatchMeta();
     unwatchDeck();
     if (boardUnsub) boardUnsub();
+    if (revealFlagsUnsub) revealFlagsUnsub();
     if (watchPlayersUnsub) watchPlayersUnsub();
     for (const unsub of Object.values(watchBoardUnsubs)) unsub();
-    lockBtn.onclick = confirmBtn.onclick = cancelBtn.onclick = null;
+    lockBtn.onclick = confirmBtn.onclick = cancelBtn.onclick = revealBtn.onclick = null;
     grid.innerHTML = "";
     watchContainer.innerHTML = "";
   };

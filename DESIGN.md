@@ -230,6 +230,7 @@ rooms/
     round/
       targetCharacterId: "<charId>"  // host's pick — hidden from guessers by rules
       revealFlags/  { "<playerId>": true, ... }        // reveal happens when all guessers set
+      revealedTarget: "<charId>"     // published by host at reveal — readable by all
 ```
 
 **Design notes**
