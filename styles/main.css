@@ -429,3 +429,73 @@ body {
   opacity: 0.3;
 }
 .watch-status { color: var(--text-muted); font-size: 0.85rem; margin: 12px 0 0; }
+
+/* ---- Reveal ---- */
+.reveal-layout { width: 100%; max-width: 900px; }
+.reveal-answer { text-align: center; margin-bottom: 28px; }
+.reveal-answer-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px 20px 12px 12px;
+  margin-top: 8px;
+}
+.reveal-answer-photo {
+  width: 64px; height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+.reveal-answer-name { font-size: 1.5rem; font-weight: 800; }
+.reveal-summary { margin: 16px 0 0; font-size: 1.1rem; font-weight: 600; }
+
+.reveal-boards {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.reveal-board {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.reveal-board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.reveal-board-name { font-weight: 700; }
+.reveal-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.reveal-badge.is-correct { color: #2ea043; border: 1px solid #2ea043; }
+.reveal-badge.is-wrong { color: #d93f0b; border: 1px solid #d93f0b; }
+
+.reveal-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.reveal-tile { position: relative; }
+.reveal-tile.is-eliminated { opacity: 0.4; filter: grayscale(1); }
+.reveal-tile.is-answer { outline: 3px solid #2ea043; outline-offset: 2px; opacity: 1; filter: none; }
+.reveal-tile.is-wrong-guess { outline: 3px solid #d93f0b; outline-offset: 2px; opacity: 1; filter: none; }
+.reveal-flag {
+  position: absolute;
+  top: 4px; left: 4px;
+  z-index: 1;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  padding: 2px 5px;
+}
+.reveal-actions { text-align: center; margin-top: 28px; }

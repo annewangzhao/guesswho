@@ -118,3 +118,32 @@ export async function setPhase(code, phase) {
 export async function setTarget(code, characterId) {
   await set(ref(db, `rooms/${code}/round/targetCharacterId`), characterId);
 }
+
+// A guesser signals they're ready to reveal.
+export async function setReveal(code) {
+  const user = await authReady;
+  await set(ref(db, `rooms/${code}/round/revealFlags/${user.uid}`), true);
+}
+
+// Host-only: publish the secret target so everyone can see it, then move to the
+// reveal phase. Called once all guessers have revealed.
+export async function publishTargetAndReveal(code) {
+  const snap = await get(ref(db, `rooms/${code}/round/targetCharacterId`));
+  const target = snap.val();
+  if (target) await set(ref(db, `rooms/${code}/round/revealedTarget`), target);
+  await update(ref(db, `rooms/${code}/meta`), { phase: "reveal" });
+}
+
+// Watch the reveal flags map { playerId: true }. Returns unsubscribe.
+export function watchRevealFlags(code, cb) {
+  return onValue(ref(db, `rooms/${code}/round/revealFlags`), (snap) =>
+    cb(snap.val() || {})
+  );
+}
+
+// Watch the publicly-revealed target character id (null until reveal).
+export function watchRevealedTarget(code, cb) {
+  return onValue(ref(db, `rooms/${code}/round/revealedTarget`), (snap) =>
+    cb(snap.val() || null)
+  );
+}

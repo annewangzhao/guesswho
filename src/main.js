@@ -6,6 +6,7 @@ import { mountLobby } from "@/ui/lobby.js";
 import { mountDeckBuilding } from "@/ui/deck.js";
 import { mountHostPick } from "@/ui/hostpick.js";
 import { mountGuessing } from "@/ui/guessing.js";
+import { mountReveal } from "@/ui/reveal.js";
 
 let intent = null; // "create" | "join"
 let pendingCode = ""; // room code when joining
@@ -72,6 +73,10 @@ function routeToPhase(phase, code, uid) {
     guessing: () => {
       showScreen("guessing");
       return mountGuessing(code, uid);
+    },
+    reveal: () => {
+      showScreen("reveal");
+      return mountReveal(code, uid);
     },
   };
   const mount = mounts[phase];

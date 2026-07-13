@@ -80,11 +80,12 @@ test("a guesser flips tiles and locks in one final guess", async ({ browser }) =
 
   await g1.click("#guess-confirm-btn");
 
-  // Board locks: the pick is marked, controls disappear, guess persisted.
+  // Board locks: the pick is marked, controls disappear, a Reveal button
+  // appears, and the guess is persisted.
   await expect(g1.locator("#guess-grid .guess-tile.is-guess")).toHaveCount(1);
   await expect(g1.locator(`#guess-grid .guess-tile[data-char-id="${guessId}"]`)).toHaveClass(/is-guess/);
   await expect(g1.locator("#guess-lock-btn")).toBeHidden();
-  await expect(g1.locator("#guess-status")).toContainText("waiting for the reveal");
+  await expect(g1.locator("#guess-reveal-btn")).toBeVisible();
   await expect(g1.locator("#guess-grid .guess-tile").first()).toBeDisabled();
   await expect.poll(() => readBoard(g1, code, "finalGuess")).toBe(guessId);
 

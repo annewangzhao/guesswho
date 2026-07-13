@@ -51,6 +51,11 @@
             ".read":  "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
             ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
             ".validate": "newData.isString() && newData.val().length <= 128"
+          },
+          "revealedTarget": {
+            ".read":  "auth != null",
+            ".write": "auth != null && auth.uid === root.child('rooms').child($roomCode).child('meta').child('hostId').val()",
+            ".validate": "newData.isString() && newData.val().length <= 128"
           }
         }
       }

@@ -4,22 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Guess Who</title>
-  <link rel="stylesheet" href="./styles/main.css?v=7ea0ebefc6" />
+  <link rel="stylesheet" href="./styles/main.css?v=6404a76ef4" />
   <!--IMPORTMAP-->
   <script type="importmap">
     {
       "imports": {
-        "@/firebase.js": "./src/firebase.js?v=7ea0ebefc6",
-        "@/game/board.js": "./src/game/board.js?v=7ea0ebefc6",
-        "@/game/deck.js": "./src/game/deck.js?v=7ea0ebefc6",
-        "@/game/image.js": "./src/game/image.js?v=7ea0ebefc6",
-        "@/game/room.js": "./src/game/room.js?v=7ea0ebefc6",
-        "@/main.js": "./src/main.js?v=7ea0ebefc6",
-        "@/ui/deck.js": "./src/ui/deck.js?v=7ea0ebefc6",
-        "@/ui/guessing.js": "./src/ui/guessing.js?v=7ea0ebefc6",
-        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=7ea0ebefc6",
-        "@/ui/lobby.js": "./src/ui/lobby.js?v=7ea0ebefc6",
-        "@/ui/screens.js": "./src/ui/screens.js?v=7ea0ebefc6"
+        "@/firebase.js": "./src/firebase.js?v=6404a76ef4",
+        "@/game/board.js": "./src/game/board.js?v=6404a76ef4",
+        "@/game/deck.js": "./src/game/deck.js?v=6404a76ef4",
+        "@/game/image.js": "./src/game/image.js?v=6404a76ef4",
+        "@/game/room.js": "./src/game/room.js?v=6404a76ef4",
+        "@/main.js": "./src/main.js?v=6404a76ef4",
+        "@/ui/deck.js": "./src/ui/deck.js?v=6404a76ef4",
+        "@/ui/guessing.js": "./src/ui/guessing.js?v=6404a76ef4",
+        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=6404a76ef4",
+        "@/ui/lobby.js": "./src/ui/lobby.js?v=6404a76ef4",
+        "@/ui/reveal.js": "./src/ui/reveal.js?v=6404a76ef4",
+        "@/ui/screens.js": "./src/ui/screens.js?v=6404a76ef4"
       }
     }
   </script>
@@ -165,6 +166,7 @@
             <button class="btn btn-ghost" id="guess-cancel-btn" type="button" hidden>Cancel</button>
             <button class="btn btn-primary" id="guess-lock-btn" type="button">Lock in my guess</button>
             <button class="btn btn-primary" id="guess-confirm-btn" type="button" hidden disabled>Confirm guess</button>
+            <button class="btn btn-primary" id="guess-reveal-btn" type="button" hidden>Reveal my guess</button>
           </div>
         </div>
       </div>
@@ -179,6 +181,26 @@
           </div>
         </header>
         <div class="watch-boards" id="watch-boards"></div>
+      </div>
+    </section>
+
+    <!-- Reveal: the answer + every guesser's board, marked correct/incorrect -->
+    <section class="screen" id="screen-reveal">
+      <div class="reveal-layout">
+        <div class="reveal-answer">
+          <p class="lobby-eyebrow">The answer was</p>
+          <div class="reveal-answer-card">
+            <img class="reveal-answer-photo" id="reveal-answer-photo" alt="" />
+            <span class="reveal-answer-name" id="reveal-answer-name"></span>
+          </div>
+          <p class="reveal-summary" id="reveal-summary"></p>
+        </div>
+
+        <div class="reveal-boards" id="reveal-boards"></div>
+
+        <div class="reveal-actions">
+          <button class="btn btn-ghost" id="reveal-newgame-btn" type="button">New game</button>
+        </div>
       </div>
     </section>
 
