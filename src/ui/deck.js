@@ -3,7 +3,7 @@
 
 import { addCharacter, watchDeck } from "@/game/deck.js";
 import { fileToThumbnail } from "@/game/image.js";
-import { watchMeta, setPhase } from "@/game/room.js";
+import { watchPlayers, setDeckReady, setPhase } from "@/game/room.js";
 
 export function mountDeckBuilding(code, myUid) {
   const nameInput = document.getElementById("char-name");
@@ -14,11 +14,14 @@ export function mountDeckBuilding(code, myUid) {
   const form = document.getElementById("add-character-form");
   const grid = document.getElementById("board-grid");
   const emptyMsg = document.getElementById("board-empty");
-  const continueBtn = document.getElementById("deck-continue-btn");
+  const doneBtn = document.getElementById("deck-done-btn");
+  const waitingEl = document.getElementById("deck-waiting");
 
   document.getElementById("deck-code").textContent = code;
 
   let thumbnail = null; // compressed data URL of the chosen photo
+  let deckCount = 0;
+  let advanced = false;
 
   function setError(msg) {
     const el = document.getElementById("deck-error");
@@ -71,6 +74,7 @@ export function mountDeckBuilding(code, myUid) {
   };
 
   const unwatchDeck = watchDeck(code, (chars) => {
+    deckCount = chars.length;
     grid.innerHTML = "";
     emptyMsg.hidden = chars.length > 0;
     for (const c of chars) {
@@ -91,26 +95,43 @@ export function mountDeckBuilding(code, myUid) {
     }
   });
 
-  const unwatchMeta = watchMeta(code, (meta) => {
-    if (!meta) return;
-    continueBtn.hidden = meta.hostId !== myUid; // host-only
-  });
-
-  continueBtn.onclick = async () => {
-    continueBtn.disabled = true;
+  doneBtn.onclick = async () => {
+    doneBtn.disabled = true;
     try {
-      await setPhase(code, "hostPick"); // issue #7 picks up here
-    } finally {
-      continueBtn.disabled = false;
+      await setDeckReady(code, true); // reflected back via watchPlayers
+    } catch {
+      doneBtn.disabled = false;
     }
   };
 
+  // Everyone marks "done"; once all present players are done (and the board
+  // isn't empty), the flow auto-advances. Any client can trigger the advance —
+  // writing the same phase is idempotent.
+  const unwatchPlayers = watchPlayers(code, (players) => {
+    const present = players.filter((p) => p.connected);
+    const readyCount = present.filter((p) => p.deckReady).length;
+    const me = players.find((p) => p.id === myUid);
+    const iAmDone = !!(me && me.deckReady);
+
+    doneBtn.hidden = iAmDone;
+    waitingEl.hidden = !iAmDone;
+    if (iAmDone) {
+      waitingEl.textContent = `Waiting for other players… (${readyCount}/${present.length} done)`;
+    }
+
+    const allReady = present.length > 0 && readyCount === present.length;
+    if (allReady && deckCount > 0 && !advanced) {
+      advanced = true;
+      setPhase(code, "hostPick"); // #7 picks up here (becomes master-select in PR2)
+    }
+  });
+
   return function cleanup() {
     unwatchDeck();
-    unwatchMeta();
+    unwatchPlayers();
     photoInput.onchange = null;
     form.onsubmit = null;
-    continueBtn.onclick = null;
+    doneBtn.onclick = null;
     resetForm();
     setError("");
   };

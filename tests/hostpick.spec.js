@@ -43,7 +43,9 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
   await expect(host.locator("#screen-deck")).toHaveAttribute("data-active", "true");
   await seedDeck(host, code, ["Zed", "Mona", "Cy"]);
   await expect(host.locator("#board-grid .tile")).toHaveCount(3);
-  await host.click("#deck-continue-btn");
+  // Everyone marks done uploading -> auto-advance.
+  await g1.click("#deck-done-btn");
+  await host.click("#deck-done-btn");
 
   // Host sees the gallery; guesser sees the waiting view.
   await expect(host.locator("#pick-host")).toBeVisible();

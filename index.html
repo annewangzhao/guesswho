@@ -4,23 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Guess Who</title>
-  <link rel="stylesheet" href="./styles/main.css?v=a67c6c2f02" />
+  <link rel="stylesheet" href="./styles/main.css?v=d057049544" />
   <!--IMPORTMAP-->
   <script type="importmap">
     {
       "imports": {
-        "@/firebase.js": "./src/firebase.js?v=a67c6c2f02",
-        "@/game/board.js": "./src/game/board.js?v=a67c6c2f02",
-        "@/game/deck.js": "./src/game/deck.js?v=a67c6c2f02",
-        "@/game/image.js": "./src/game/image.js?v=a67c6c2f02",
-        "@/game/room.js": "./src/game/room.js?v=a67c6c2f02",
-        "@/main.js": "./src/main.js?v=a67c6c2f02",
-        "@/ui/deck.js": "./src/ui/deck.js?v=a67c6c2f02",
-        "@/ui/guessing.js": "./src/ui/guessing.js?v=a67c6c2f02",
-        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=a67c6c2f02",
-        "@/ui/lobby.js": "./src/ui/lobby.js?v=a67c6c2f02",
-        "@/ui/reveal.js": "./src/ui/reveal.js?v=a67c6c2f02",
-        "@/ui/screens.js": "./src/ui/screens.js?v=a67c6c2f02"
+        "@/firebase.js": "./src/firebase.js?v=d057049544",
+        "@/game/board.js": "./src/game/board.js?v=d057049544",
+        "@/game/deck.js": "./src/game/deck.js?v=d057049544",
+        "@/game/image.js": "./src/game/image.js?v=d057049544",
+        "@/game/room.js": "./src/game/room.js?v=d057049544",
+        "@/main.js": "./src/main.js?v=d057049544",
+        "@/ui/deck.js": "./src/ui/deck.js?v=d057049544",
+        "@/ui/guessing.js": "./src/ui/guessing.js?v=d057049544",
+        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=d057049544",
+        "@/ui/lobby.js": "./src/ui/lobby.js?v=d057049544",
+        "@/ui/reveal.js": "./src/ui/reveal.js?v=d057049544",
+        "@/ui/screens.js": "./src/ui/screens.js?v=d057049544"
       }
     }
   </script>
@@ -95,7 +95,10 @@
             <h2 class="deck-title">Build the board</h2>
             <p class="deck-sub">Everyone adds the people they know — they appear for all players live.</p>
           </div>
-          <button class="btn btn-primary" id="deck-continue-btn" type="button" hidden>Continue</button>
+          <div class="deck-done-wrap">
+            <button class="btn btn-primary" id="deck-done-btn" type="button">I'm done uploading</button>
+            <p class="deck-waiting" id="deck-waiting" hidden></p>
+          </div>
         </header>
 
         <form class="add-character" id="add-character-form">

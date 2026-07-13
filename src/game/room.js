@@ -109,9 +109,15 @@ export function watchMeta(code, onMeta) {
   return onValue(ref(db, `rooms/${code}/meta`), (snap) => onMeta(snap.val()));
 }
 
-// Host-only: advance the room to the next phase.
+// Advance the room to the next phase.
 export async function setPhase(code, phase) {
   await update(ref(db, `rooms/${code}/meta`), { phase });
+}
+
+// Mark the current player done (or not) uploading characters.
+export async function setDeckReady(code, ready) {
+  const user = await authReady;
+  await set(ref(db, `rooms/${code}/players/${user.uid}/deckReady`), !!ready);
 }
 
 // Host-only (enforced by rules): set the target character for the round.
