@@ -4,7 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Guess Who</title>
-  <link rel="stylesheet" href="./styles/main.css" />
+  <link rel="stylesheet" href="./styles/main.css?v=7ea0ebefc6" />
+  <!--IMPORTMAP-->
+  <script type="importmap">
+    {
+      "imports": {
+        "@/firebase.js": "./src/firebase.js?v=7ea0ebefc6",
+        "@/game/board.js": "./src/game/board.js?v=7ea0ebefc6",
+        "@/game/deck.js": "./src/game/deck.js?v=7ea0ebefc6",
+        "@/game/image.js": "./src/game/image.js?v=7ea0ebefc6",
+        "@/game/room.js": "./src/game/room.js?v=7ea0ebefc6",
+        "@/main.js": "./src/main.js?v=7ea0ebefc6",
+        "@/ui/deck.js": "./src/ui/deck.js?v=7ea0ebefc6",
+        "@/ui/guessing.js": "./src/ui/guessing.js?v=7ea0ebefc6",
+        "@/ui/hostpick.js": "./src/ui/hostpick.js?v=7ea0ebefc6",
+        "@/ui/lobby.js": "./src/ui/lobby.js?v=7ea0ebefc6",
+        "@/ui/screens.js": "./src/ui/screens.js?v=7ea0ebefc6"
+      }
+    }
+  </script>
+  <!--/IMPORTMAP-->
 </head>
 <body>
   <div id="app">
@@ -165,6 +184,6 @@
 
   </div>
 
-  <script type="module" src="./src/main.js"></script>
+  <script type="module">import "@/main.js";</script>
 </body>
 </html>

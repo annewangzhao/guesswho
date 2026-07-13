@@ -1,6 +1,6 @@
 // Lobby rendering: room code, live player list, and host-only start control.
 
-import { watchPlayers, watchMeta, setPhase } from "../game/room.js";
+import { watchPlayers, watchMeta, setPhase } from "@/game/room.js";
 
 // Renders the lobby for a room and keeps it live. Returns a cleanup function.
 export function mountLobby(code, myUid) {

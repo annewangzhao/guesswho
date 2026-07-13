@@ -12,7 +12,7 @@ const TINY_JPEG =
 async function seedDeck(page, code, names) {
   await page.evaluate(
     async ({ code, names, img }) => {
-      const { addCharacter } = await import("/src/game/deck.js");
+      const { addCharacter } = await import("@/game/deck.js");
       for (const n of names) await addCharacter(code, n, img);
     },
     { code, names, img: TINY_JPEG }
@@ -63,7 +63,7 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
 
   // The target is actually stored and the HOST can read it back.
   const stored = await host.evaluate(async (code) => {
-    const { db, ref, get } = await import("/src/firebase.js");
+    const { db, ref, get } = await import("@/firebase.js");
     const snap = await get(ref(db, `rooms/${code}/round/targetCharacterId`));
     return snap.val();
   }, code);
@@ -71,7 +71,7 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
 
   // The GUESSER cannot read the target (rules deny it).
   const guesserRead = await g1.evaluate(async (code) => {
-    const { db, ref, get } = await import("/src/firebase.js");
+    const { db, ref, get } = await import("@/firebase.js");
     try {
       const snap = await get(ref(db, `rooms/${code}/round/targetCharacterId`));
       return { denied: false, value: snap.val() };
@@ -88,7 +88,7 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
     .poll(
       () =>
         g1.evaluate(async (code) => {
-          const { db, ref, get } = await import("/src/firebase.js");
+          const { db, ref, get } = await import("@/firebase.js");
           const snap = await get(ref(db, `rooms/${code}/meta/phase`));
           return snap.val();
         }, code),
@@ -98,7 +98,7 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
 
   // Cleanup.
   await host.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/round/targetCharacterId`));
     await remove(ref(db, `rooms/${code}/deck`));
@@ -106,7 +106,7 @@ test("host picks a target that guessers cannot see", async ({ browser }) => {
     await remove(ref(db, `rooms/${code}/meta`));
   }, code);
   await g1.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
   }, code);

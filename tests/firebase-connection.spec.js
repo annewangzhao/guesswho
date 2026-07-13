@@ -9,7 +9,7 @@ test("firebase anonymous auth + read/write round-trip", async ({ page }) => {
   await page.goto("/index.html");
 
   const result = await page.evaluate(async () => {
-    const { db, authReady, ref, set, get, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, set, get, remove } = await import("@/firebase.js");
 
     const user = await authReady; // resolves once anonymous sign-in completes
     const roomCode = `_TEST_${Date.now()}`;

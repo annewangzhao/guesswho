@@ -2,7 +2,7 @@
 // independently randomized order (anti-inference — DESIGN.md §4). The layout is
 // persisted at rooms/{code}/boards/{playerId}/layout so it's stable for the round.
 
-import { db, authReady, ref, get, set, remove, onValue } from "../firebase.js";
+import { db, authReady, ref, get, set, remove, onValue } from "@/firebase.js";
 
 // Cryptographically-seeded Fisher–Yates shuffle (returns a new array).
 function shuffle(ids) {

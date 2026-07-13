@@ -1,0 +1,9 @@
+#!/bin/sh
+# Regenerate the versioned import map so every deploy busts browser caches.
+# Only changes index.html when the app's JS/CSS content actually changed.
+PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+node scripts/stamp.mjs || {
+  echo "pre-commit: stamp.mjs failed" >&2
+  exit 1
+}
+git add index.html

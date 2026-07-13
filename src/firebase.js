@@ -7,7 +7,11 @@
 // identifiers in the browser. Actual protection comes from Realtime Database
 // security rules (see database.rules.json), not from hiding these values.
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import {
+  initializeApp,
+  getApps,
+  getApp,
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import {
   getDatabase,
   ref,
@@ -37,7 +41,9 @@ const firebaseConfig = {
   // measurementId intentionally omitted — no Analytics.
 };
 
-export const app = initializeApp(firebaseConfig);
+// Idempotent: reuse the existing app if this module is ever evaluated twice
+// (e.g. loaded via two slightly different URLs), instead of throwing.
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const db = getDatabase(app);
 export const auth = getAuth(app);
 

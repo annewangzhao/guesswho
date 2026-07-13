@@ -10,7 +10,7 @@ const TINY_JPEG =
 async function readBoard(page, code, key) {
   return page.evaluate(
     async ({ code, key }) => {
-      const { db, authReady, ref, get } = await import("/src/firebase.js");
+      const { db, authReady, ref, get } = await import("@/firebase.js");
       const u = await authReady;
       const snap = await get(ref(db, `rooms/${code}/boards/${u.uid}/${key}`));
       return snap.val();
@@ -41,14 +41,14 @@ test("a guesser flips tiles and locks in one final guess", async ({ browser }) =
   await expect(host.locator("#screen-deck")).toHaveAttribute("data-active", "true");
   await host.evaluate(
     async ({ code, img }) => {
-      const { addCharacter } = await import("/src/game/deck.js");
+      const { addCharacter } = await import("@/game/deck.js");
       for (const n of ["A", "B", "C", "D", "E"]) await addCharacter(code, n, img);
     },
     { code, img: TINY_JPEG }
   );
   await expect(host.locator("#board-grid .tile")).toHaveCount(5);
   await host.evaluate(async (code) => {
-    const { setPhase } = await import("/src/game/room.js");
+    const { setPhase } = await import("@/game/room.js");
     await setPhase(code, "guessing");
   }, code);
 
@@ -90,13 +90,13 @@ test("a guesser flips tiles and locks in one final guess", async ({ browser }) =
 
   // Cleanup.
   await g1.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/boards/${u.uid}`));
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
   }, code);
   await host.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/deck`));
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));

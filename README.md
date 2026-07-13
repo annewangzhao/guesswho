@@ -15,6 +15,18 @@ The game itself is plain static HTML/CSS/JS — no build step. Just open
 npm run serve   # serves at http://127.0.0.1:8791
 ```
 
+### Cache-busting (no hard-refresh needed)
+
+Modules are imported via an import map in `index.html` where each URL carries a
+content-hash version (`?v=…`). `scripts/stamp.mjs` regenerates it, and a
+pre-commit hook (`.githooks/pre-commit`) runs it automatically, so every deploy
+that changes code makes browsers fetch fresh files — no hard-refresh. Enable the
+hook once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ### Testing (Playwright)
 
 Playwright is a **dev-only** dependency (never shipped to players) used to drive
