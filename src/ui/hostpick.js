@@ -1,8 +1,8 @@
 // Host-pick screen: the host secretly chooses the target from a gallery of the
 // deck; the pick minimizes to a bottom bar. Guessers see a waiting view.
 
-import { watchDeck } from "../game/deck.js";
-import { watchMeta, watchPlayers, setTarget, setPhase } from "../game/room.js";
+import { watchDeck } from "@/game/deck.js";
+import { watchMeta, watchPlayers, setTarget, setPhase } from "@/game/room.js";
 
 export function mountHostPick(code, myUid) {
   const hostView = document.getElementById("pick-host");

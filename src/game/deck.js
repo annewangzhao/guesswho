@@ -10,7 +10,7 @@ import {
   remove,
   onValue,
   serverTimestamp,
-} from "../firebase.js";
+} from "@/firebase.js";
 
 // Add a character to the room's shared deck. `imageDataUrl` is a small JPEG
 // thumbnail (see image.js). Returns the new character id.

@@ -1,9 +1,9 @@
 // Deck-building screen: add characters (name + photo) and see the shared board
 // update live for everyone.
 
-import { addCharacter, watchDeck } from "../game/deck.js";
-import { fileToThumbnail } from "../game/image.js";
-import { watchMeta, setPhase } from "../game/room.js";
+import { addCharacter, watchDeck } from "@/game/deck.js";
+import { fileToThumbnail } from "@/game/image.js";
+import { watchMeta, setPhase } from "@/game/room.js";
 
 export function mountDeckBuilding(code, myUid) {
   const nameInput = document.getElementById("char-name");

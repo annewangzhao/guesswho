@@ -10,7 +10,7 @@ const TINY_JPEG =
 
 async function uid(page) {
   return page.evaluate(async () => {
-    const { authReady } = await import("/src/firebase.js");
+    const { authReady } = await import("@/firebase.js");
     return (await authReady).uid;
   });
 }
@@ -46,14 +46,14 @@ test("host watches guessers' boards from behind: live flips, identities hidden",
   await expect(host.locator("#screen-deck")).toHaveAttribute("data-active", "true");
   await host.evaluate(
     async ({ code, img }) => {
-      const { addCharacter } = await import("/src/game/deck.js");
+      const { addCharacter } = await import("@/game/deck.js");
       for (const n of ["A", "B", "C", "D", "E", "F"]) await addCharacter(code, n, img);
     },
     { code, img: TINY_JPEG }
   );
   await expect(host.locator("#board-grid .tile")).toHaveCount(6);
   await host.evaluate(async (code) => {
-    const { setPhase } = await import("/src/game/room.js");
+    const { setPhase } = await import("@/game/room.js");
     await setPhase(code, "guessing");
   }, code);
 
@@ -85,7 +85,7 @@ test("host watches guessers' boards from behind: live flips, identities hidden",
   // Cleanup.
   for (const [pg, ctx] of [[g1, g1Ctx], [g2, g2Ctx]]) {
     await pg.evaluate(async (code) => {
-      const { db, authReady, ref, remove } = await import("/src/firebase.js");
+      const { db, authReady, ref, remove } = await import("@/firebase.js");
       const u = await authReady;
       await remove(ref(db, `rooms/${code}/boards/${u.uid}`));
       await remove(ref(db, `rooms/${code}/players/${u.uid}`));
@@ -93,7 +93,7 @@ test("host watches guessers' boards from behind: live flips, identities hidden",
     await ctx.close();
   }
   await host.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/deck`));
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));

@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 
 async function removeSelf(page, code) {
   await page.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
   }, code);
@@ -68,7 +68,7 @@ test("three players join one room with a live, synced roster", async ({ browser 
     .poll(
       () =>
         g1.evaluate(async (code) => {
-          const { db, ref, get } = await import("/src/firebase.js");
+          const { db, ref, get } = await import("@/firebase.js");
           const snap = await get(ref(db, `rooms/${code}/meta/phase`));
           return snap.val();
         }, code),
@@ -79,7 +79,7 @@ test("three players join one room with a live, synced roster", async ({ browser 
   // --- Cleanup ---
   await removeSelf(g1, code);
   await host.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
     await remove(ref(db, `rooms/${code}/meta`));

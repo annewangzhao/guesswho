@@ -2,14 +2,14 @@
 // down, then locks in exactly one final guess. State syncs to the DB so the
 // host's watch view (#9) and the reveal (#10) can read it.
 
-import { watchDeck } from "../game/deck.js";
-import { watchMeta, watchPlayers } from "../game/room.js";
+import { watchDeck } from "@/game/deck.js";
+import { watchMeta, watchPlayers } from "@/game/room.js";
 import {
   ensureBoardLayout,
   watchBoard,
   setEliminated,
   lockGuess,
-} from "../game/board.js";
+} from "@/game/board.js";
 
 export function mountGuessing(code, myUid) {
   const guesserView = document.getElementById("guess-guesser");

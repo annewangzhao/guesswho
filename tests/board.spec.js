@@ -41,7 +41,7 @@ test("each guesser gets the same characters in a different, persisted order", as
   const names = ["A", "B", "C", "D", "E", "F", "G", "H"];
   await host.evaluate(
     async ({ code, names, img }) => {
-      const { addCharacter } = await import("/src/game/deck.js");
+      const { addCharacter } = await import("@/game/deck.js");
       for (const n of names) await addCharacter(code, n, img);
     },
     { code, names, img: TINY_JPEG }
@@ -50,7 +50,7 @@ test("each guesser gets the same characters in a different, persisted order", as
 
   // Jump straight to guessing (host-pick UI is covered by its own test).
   await host.evaluate(async (code) => {
-    const { setPhase } = await import("/src/game/room.js");
+    const { setPhase } = await import("@/game/room.js");
     await setPhase(code, "guessing");
   }, code);
 
@@ -68,7 +68,7 @@ test("each guesser gets the same characters in a different, persisted order", as
 
   // The order is persisted: g1's stored layout matches what it rendered.
   const stored1 = await g1.evaluate(async (code) => {
-    const { db, authReady, ref, get } = await import("/src/firebase.js");
+    const { db, authReady, ref, get } = await import("@/firebase.js");
     const u = await authReady;
     const snap = await get(ref(db, `rooms/${code}/boards/${u.uid}/layout`));
     return snap.val();
@@ -78,7 +78,7 @@ test("each guesser gets the same characters in a different, persisted order", as
   // Cleanup.
   for (const [pg, ctx] of [[g1, g1Ctx], [g2, g2Ctx]]) {
     await pg.evaluate(async (code) => {
-      const { db, authReady, ref, remove } = await import("/src/firebase.js");
+      const { db, authReady, ref, remove } = await import("@/firebase.js");
       const u = await authReady;
       await remove(ref(db, `rooms/${code}/boards/${u.uid}`));
       await remove(ref(db, `rooms/${code}/players/${u.uid}`));
@@ -86,7 +86,7 @@ test("each guesser gets the same characters in a different, persisted order", as
     await ctx.close();
   }
   await host.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/deck`));
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));

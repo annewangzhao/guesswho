@@ -16,7 +16,7 @@ test("only the host can read the target; guessers are denied", async ({ browser 
 
   // Host creates the room, sets the target, and reads it back (should succeed).
   const host = await hostPage.evaluate(async (roomCode) => {
-    const { db, authReady, ref, set, get } = await import("/src/firebase.js");
+    const { db, authReady, ref, set, get } = await import("@/firebase.js");
     const user = await authReady;
     await set(ref(db, `rooms/${roomCode}/meta`), {
       code: "_SEC_", hostId: user.uid, phase: "guessing",
@@ -28,7 +28,7 @@ test("only the host can read the target; guessers are denied", async ({ browser 
 
   // A different anonymous user (guesser) tries to read the answer (should be denied).
   const guest = await guestPage.evaluate(async (roomCode) => {
-    const { db, authReady, ref, get } = await import("/src/firebase.js");
+    const { db, authReady, ref, get } = await import("@/firebase.js");
     const user = await authReady;
     let denied = false, value = null;
     try {
@@ -43,7 +43,7 @@ test("only the host can read the target; guessers are denied", async ({ browser 
   // Sanity: the guesser CAN still read a shared part of the room (proves it's not
   // just blanket-denied everything, i.e. the host-only scoping is precise).
   const guestSharedRead = await guestPage.evaluate(async (roomCode) => {
-    const { db, ref, get } = await import("/src/firebase.js");
+    const { db, ref, get } = await import("@/firebase.js");
     const snap = await get(ref(db, `rooms/${roomCode}/meta/phase`));
     return snap.val();
   }, roomCode);
@@ -51,7 +51,7 @@ test("only the host can read the target; guessers are denied", async ({ browser 
   // Cleanup (order matters: remove the target while meta/hostId still proves we're
   // the host, THEN remove meta).
   await hostPage.evaluate(async (roomCode) => {
-    const { db, ref, remove } = await import("/src/firebase.js");
+    const { db, ref, remove } = await import("@/firebase.js");
     await remove(ref(db, `rooms/${roomCode}/round/targetCharacterId`));
     await remove(ref(db, `rooms/${roomCode}/meta`));
   }, roomCode);

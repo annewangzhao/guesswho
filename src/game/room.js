@@ -11,7 +11,7 @@ import {
   onValue,
   onDisconnect,
   serverTimestamp,
-} from "../firebase.js";
+} from "@/firebase.js";
 
 // Room codes: 4 chars, uppercase, no confusable letters/digits (no O/0, I/1).
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

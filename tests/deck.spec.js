@@ -73,14 +73,14 @@ test("characters added by one player appear live on everyone's board", async ({ 
 
   // Cleanup.
   await host.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/deck`));
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
     await remove(ref(db, `rooms/${code}/meta`));
   }, code);
   await g1.evaluate(async (code) => {
-    const { db, authReady, ref, remove } = await import("/src/firebase.js");
+    const { db, authReady, ref, remove } = await import("@/firebase.js");
     const u = await authReady;
     await remove(ref(db, `rooms/${code}/players/${u.uid}`));
   }, code);
